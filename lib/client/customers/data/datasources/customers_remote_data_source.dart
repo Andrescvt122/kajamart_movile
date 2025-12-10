@@ -14,7 +14,7 @@ class CustomersRemoteDataSource {
   /// Cliente HTTP inyectable para facilitar pruebas o mocking.
   final http.Client httpClient;
 
-  CustomersRemoteDataSource({
+  const CustomersRemoteDataSource({
     required this.baseUrl,
     this.customersEndpoint = '/clientes',
     http.Client? httpClient,
