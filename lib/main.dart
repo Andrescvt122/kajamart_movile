@@ -8,6 +8,7 @@ import 'admin/screens/provider_detail.dart';
 import 'admin/screens/product_batches.dart';
 import 'admin/models/provider.dart';
 import 'admin/models/product.dart';
+import 'client/customers/presentation/pages/customers_list_page.dart';
 
 void main() {
   runApp(const KajamartApp());
@@ -35,6 +36,7 @@ class KajamartApp extends StatelessWidget {
         '/check-email': (context) => const CheckEmailPage(),
         '/home': (context) => const HomeScreen(),
         '/admin-home': (context) => const AdminHomeScreen(),
+        '/clientes': (context) => const CustomersListPage(),
         '/provider-detail': (context) {
           final args = ModalRoute.of(context)!.settings.arguments;
           if (args != null && args is Provider) {
