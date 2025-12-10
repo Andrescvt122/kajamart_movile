@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'client/screens/home_screen.dart';
-import 'client/pages/login_page.dart';
-import 'client/pages/recover_password.dart';
-import 'client/pages/check_email_page.dart';
 import 'admin/screens/admin_home.dart';
 import 'admin/screens/provider_detail.dart';
 import 'admin/screens/product_batches.dart';
@@ -28,12 +24,11 @@ class KajamartApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.grey[100],
         fontFamily: 'Roboto',
       ),
-      initialRoute: '/login',
+      // Usamos `home` en vez de `initialRoute` para asegurar una única raíz Navigator
+      home: const AdminHomeScreen(),
       routes: {
-        '/login': (context) => const LoginPage(),
-        '/recover': (context) => const RecoverPasswordPage(),
-        '/check-email': (context) => const CheckEmailPage(),
-        '/home': (context) => const HomeScreen(),
+        // Ruta de login temporal que apunta a la pantalla principal mientras se implementa
+        '/login': (context) => const AdminHomeScreen(),
         '/admin-home': (context) => const AdminHomeScreen(),
         '/provider-detail': (context) {
           final args = ModalRoute.of(context)!.settings.arguments;
