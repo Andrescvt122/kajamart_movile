@@ -43,7 +43,8 @@ class Product {
   final bool? categoryState;
   final List<ProductDetail> details;
 
-  String get priceLabel => price != null ? '\$${price!.toStringAsFixed(0)}' : 'S/D';
+  String get priceLabel =>
+      price != null ? '\$${price!.toStringAsFixed(0)}' : 'S/D';
 
   String get statusLabel {
     if (isActive == null) return 'Sin estado';
@@ -294,7 +295,8 @@ class _ProductImage extends StatelessWidget {
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => _PlaceholderBox(name: name),
+              errorBuilder: (context, error, stackTrace) =>
+                  _PlaceholderBox(name: name),
             )
           : _PlaceholderBox(name: name),
     );

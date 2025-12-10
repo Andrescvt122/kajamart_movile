@@ -1,52 +1,74 @@
+// lib/admin/screens/product_list.dart
 import 'package:flutter/material.dart';
+
 import '../constants/app_constants.dart';
 import '../models/product.dart';
+import '../services/product_service.dart';
 
 class ProductListScreen extends StatefulWidget {
-  final List<Product> products;
-
-  const ProductListScreen({Key? key, required this.products}) : super(key: key);
+  const ProductListScreen({Key? key}) : super(key: key);
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
+  late final ProductService _productService;
+
   String _selectedFilter = "Todos";
   String _searchQuery = "";
 
   List<String> get filters => ["Todos", "Activos", "Inactivos", "Stock bajo"];
 
+  @override
+  void initState() {
+    super.initState();
+    _productService = ProductService();
+    _productService.addListener(_onServiceChanged);
+  }
+
+  void _onServiceChanged() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _productService.removeListener(_onServiceChanged);
+    super.dispose();
+  }
+
   List<Product> get filteredProducts {
     List<Product> list;
+    final products = _productService.products;
 
     switch (_selectedFilter) {
       case "Activos":
-        list = widget.products
+        list = products
             .where((p) => p.status.toLowerCase() == "activo")
             .toList();
         break;
       case "Inactivos":
-        list = widget.products
+        list = products
             .where((p) => p.status.toLowerCase() != "activo")
             .toList();
         break;
       case "Stock bajo":
-        list = widget.products
+        list = products
             .where((p) => p.currentStock <= p.minStock)
             .toList();
         break;
       default:
-        list = widget.products;
+        list = products;
     }
 
-    // Filtro de búsqueda
     if (_searchQuery.isNotEmpty) {
       list = list
           .where(
             (p) =>
                 p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                p.category.toLowerCase().contains(_searchQuery.toLowerCase()),
+                p.category
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()),
           )
           .toList();
     }
@@ -56,6 +78,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = _productService.isLoading;
+    final error = _productService.error;
+
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
@@ -136,134 +161,174 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
           ),
           const Divider(height: 1),
-          // Lista de productos
+          // Lista / estados de carga
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(12),
-              itemCount: filteredProducts.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final p = filteredProducts[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/batches', arguments: p);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppConstants.secondaryColor.withOpacity(0.6),
+            child: Builder(
+              builder: (_) {
+                if (isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (error != null) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        error,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Imagen ajustada y cuadrada
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            bottomLeft: Radius.circular(12),
+                  );
+                }
+
+                if (filteredProducts.isEmpty) {
+                  return const Center(
+                    child: Text("No hay productos para mostrar"),
+                  );
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: filteredProducts.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final p = filteredProducts[index];
+                    return GestureDetector(
+                      onTap: () {
+                        // 👉 Ir a la lista de lotes de ESTE producto
+                        Navigator.pushNamed(
+                          context,
+                          '/batches',
+                          arguments: p,
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color:
+                                AppConstants.secondaryColor.withOpacity(0.6),
                           ),
-                          child: Image.network(
-                            p.imageUrl,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 100,
-                              height: 100,
-                              color: AppConstants.secondaryColor,
-                              child: Icon(
-                                Icons.image,
-                                color: AppConstants.textLightColor,
-                              ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        // Info
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  p.name,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: AppConstants.textDarkColor,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  p.category,
-                                  style: TextStyle(
-                                    fontSize: 13,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Imagen
+                            ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                bottomLeft: Radius.circular(12),
+                              ),
+                              child: Image.network(
+                                p.imageUrl,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 100,
+                                  height: 100,
+                                  color: AppConstants.secondaryColor,
+                                  child: Icon(
+                                    Icons.image,
                                     color: AppConstants.textLightColor,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Row(
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            // Info
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(
-                                      Icons.inventory,
-                                      size: 16,
-                                      color: Colors.grey[600],
-                                    ),
-                                    const SizedBox(width: 4),
                                     Text(
-                                      "Stock: ${p.currentStock}",
+                                      p.name,
                                       style: TextStyle(
-                                        color: Colors.grey[700],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: AppConstants.textDarkColor,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      p.category,
+                                      style: TextStyle(
                                         fontSize: 13,
+                                        color: AppConstants.textLightColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.inventory,
+                                          size: 16,
+                                          color: Colors.grey[600],
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          "Stock: ${p.currentStock}",
+                                          style: TextStyle(
+                                            color: Colors.grey[700],
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "\$${p.price.toStringAsFixed(0)}",
+                                      style: TextStyle(
+                                        color: AppConstants.primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "\$${p.price.toStringAsFixed(0)}",
-                                  style: TextStyle(
-                                    color: AppConstants.primaryColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
+                              ),
+                            ),
+                            // Estado
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                p.status,
+                                style: TextStyle(
+                                  color: p.status.toLowerCase() == "activo"
+                                      ? AppConstants.primaryColor
+                                      : Colors.red,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                        // Estado
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            p.status,
-                            style: TextStyle(
-                              color: p.status.toLowerCase() == "activo"
-                                  ? AppConstants.primaryColor
-                                  : Colors.red,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _productService.fetchProducts(),
+        child: const Icon(Icons.refresh),
       ),
     );
   }
