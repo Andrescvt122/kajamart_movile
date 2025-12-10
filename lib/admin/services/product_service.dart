@@ -1,76 +1,94 @@
-// lib/services/product_service.dart
+// lib/admin/services/product_service.dart
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
 import '../models/product.dart';
-import '../data/sample_data.dart';
+import '../models/batch.dart';
 
 class ProductService extends ChangeNotifier {
+  final String _baseUrl = 'http://localhost:3000/kajamart/api';
+
+  bool isLoading = false;
+  String? error;
+
   List<Product> _products = [];
-
-  ProductService() {
-    _loadSampleData();
-  }
-
   List<Product> get products => _products;
 
-  void _loadSampleData() {
-    _products = SampleData.sampleProducts;
-    notifyListeners();
+  ProductService() {
+    fetchProducts();
   }
 
-  Product? getProductById(String id) {
+  Future<void> fetchProducts() async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
     try {
-      return _products.firstWhere((product) => product.id == id);
+      final uri = Uri.parse('$_baseUrl/products');
+      final resp = await http.get(uri);
+
+      if (resp.statusCode != 200) {
+        error = 'Error ${resp.statusCode} al obtener productos';
+        _products = [];
+        return;
+      }
+
+      final List<dynamic> data = jsonDecode(resp.body) as List<dynamic>;
+
+      _products = data.map<Product>((item) {
+        final p = item as Map<String, dynamic>;
+
+        final int stockActual = (p['stock_actual'] ?? 0) as int;
+        final int stockMinimo = (p['stock_minimo'] ?? 0) as int;
+        final int stockMaximo = (p['stock_maximo'] ?? 0) as int;
+        final double precioVenta =
+            (p['precio_venta'] as num?)?.toDouble() ?? 0.0;
+        final double costoUnitario =
+            (p['costo_unitario'] as num?)?.toDouble() ?? 0.0;
+
+        final String imageUrl = (p['url_imagen'] ?? '') as String;
+        final String categoria = (p['categoria'] ?? 'Sin categoría') as String;
+
+        // ⚠️ Como el backend aún no devuelve lotes, generamos
+        // un solo lote con todo el stock del producto.
+        final List<Batch> batches = [
+          Batch(
+            idDetalle: 'L${p['id_producto']}',
+            barcode: 'COD-${p['id_producto']}',
+            expiryDate: DateTime.now().add(const Duration(days: 365)),
+            quantity: stockActual,
+            consumedStock: 0,
+            price: precioVenta,
+          ),
+        ];
+
+        return Product(
+          id: p['id_producto'].toString(),
+          name: p['nombre']?.toString() ?? '',
+          category: categoria,
+          imageUrl: imageUrl.isNotEmpty
+              ? imageUrl
+              : 'https://via.placeholder.com/150',
+          currentStock: stockActual,
+          minStock: stockMinimo,
+          maxStock: stockMaximo,
+          price: precioVenta,
+          status: (p['estado'] == true) ? 'activo' : 'inactivo',
+          purchasePrice: costoUnitario,
+          salePrice: precioVenta,
+          markupPercent: null,
+          ivaPercent:
+              (p['iva_detalle']?['valor_impuesto'] as num?)?.toDouble(),
+          batches: batches,
+        );
+      }).toList();
     } catch (e) {
-      return null;
-    }
-  }
-
-  List<Product> getProductsByCategory(String category) {
-    return _products.where((product) => product.category == category).toList();
-  }
-
-  List<Product> getLowStockProducts() {
-    return _products.where((product) => product.currentStock <= product.minStock).toList();
-  }
-
-  List<Product> getExpiringSoonProducts({int daysAhead = 7}) {
-    final now = DateTime.now();
-    final futureDate = now.add(Duration(days: daysAhead));
-
-    return _products.where((product) {
-      return product.batches.any((batch) {
-        return batch.expiryDate.isBefore(futureDate) && batch.expiryDate.isAfter(now);
-      });
-    }).toList();
-  }
-
-  // Métodos para futuras funcionalidades
-  Future<void> addProduct(Product product) async {
-    _products.add(product);
-    notifyListeners();
-  }
-
-  Future<void> updateProduct(Product updatedProduct) async {
-    final index = _products.indexWhere((product) => product.id == updatedProduct.id);
-    if (index != -1) {
-      _products[index] = updatedProduct;
+      error = 'Error al conectar con el servidor: $e';
+      _products = [];
+    } finally {
+      isLoading = false;
       notifyListeners();
     }
   }
-
-  Future<void> deleteProduct(String id) async {
-    _products.removeWhere((product) => product.id == id);
-    notifyListeners();
-  }
-
-  // Estadísticas rápidas
-  int get totalProducts => _products.length;
-
-  double get totalInventoryValue {
-    return _products.fold(0.0, (sum, product) => sum + (product.price * product.currentStock));
-  }
-
-  int get lowStockCount => getLowStockProducts().length;
-
-  int get expiringSoonCount => getExpiringSoonProducts().length;
 }
