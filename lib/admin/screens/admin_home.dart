@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import '../services/data_service.dart';
 import 'product_list.dart';
-import 'profile_screen.dart';
 import 'provider_list.dart';
 
 class AdminHomeScreen extends StatefulWidget {
@@ -24,22 +24,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     'Salir',
   ];
 
-  final List<IconData> _icons = [
-    Icons.inventory,
-    Icons.business,
-    Icons.point_of_sale,
-    Icons.shopping_cart,
-    Icons.people,
-    Icons.person,
-    Icons.logout,
-  ];
-
   void _handleLogout() {
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/login',
-      (route) => false,
-    );
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 
   @override
@@ -79,18 +65,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             icon: Icon(Icons.shopping_cart),
             label: 'Compras',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Clientes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Ver mi perfil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.logout),
-            label: 'Salir',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Clientes'),
         ],
       ),
     );
@@ -140,7 +115,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   Widget _buildProductsScreen() {
-    return const ProductListScreen();
+    return ProductListScreen(products: DataService.sampleProducts);
   }
 
   Widget _buildSalesScreen() {
@@ -210,6 +185,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   Widget _buildMyProfileScreen() {
-    return const ProfileScreen();
+    return Scaffold(
+      appBar: AppBar(title: const Text('Mi Perfil')),
+      body: const Center(child: Text('Pantalla de perfil en construcción')),
+    );
   }
 }

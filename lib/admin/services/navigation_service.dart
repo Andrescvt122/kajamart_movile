@@ -27,9 +27,7 @@ class NavigationService {
         );
 
       case '/suppliers':
-        return MaterialPageRoute(
-          builder: (_) => const ProviderListScreen(),
-        );
+        return MaterialPageRoute(builder: (_) => const ProviderListScreen());
 
       case '/batches':
         final product = settings.arguments as Product?;
@@ -61,11 +59,6 @@ class NavigationService {
           builder: (_) => _buildUnderConstructionScreen(sectionIndex),
         );
     }
-
-    // Fallback (aunque nunca se alcanza debido al default case arriba)
-    return MaterialPageRoute(
-      builder: (_) => ProductListScreen(products: productService.products),
-    );
   }
 
   static Widget _buildUnderConstructionScreen(int? sectionIndex) {
