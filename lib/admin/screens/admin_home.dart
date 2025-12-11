@@ -4,6 +4,9 @@ import '../services/data_service.dart';
 import 'product_list.dart';
 import 'profile_screen.dart';
 import 'provider_list.dart';
+import '../../client/customers/presentation/pages/customers_list_page.dart';
+import '../purchases/presentation/pages/purchases_list_page.dart';
+import '../sales/presentation/pages/sales_list_page.dart';
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
@@ -25,22 +28,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     'Salir',
   ];
 
-  final List<IconData> _icons = [
-    Icons.inventory,
-    Icons.business,
-    Icons.point_of_sale,
-    Icons.shopping_cart,
-    Icons.people,
-    Icons.person,
-    Icons.logout,
-  ];
+  // icons list removed (unused)
 
   void _handleLogout() {
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/login',
-      (route) => false,
-    );
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 
   @override
@@ -80,25 +71,24 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             icon: Icon(Icons.shopping_cart),
             label: 'Compras',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Clientes',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Clientes'),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Ver mi perfil',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.logout),
-            label: 'Salir',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.logout), label: 'Salir'),
         ],
       ),
     );
   }
 
   PreferredSizeWidget? _buildAppBar() {
-    const screensWithOwnAppBar = {0, 1, 5};
+    // Mark these indices as having their own AppBar because the
+    // embedded widgets provide their own Scaffold/AppBar.
+    // Include indices 2 (Ventas) and 3 (Compras) so the Admin global
+    // AppBar is hidden and the Sales/Purchases modules can show their
+    // own headers.
+    const screensWithOwnAppBar = {0, 1, 2, 3, 4, 5};
 
     if (screensWithOwnAppBar.contains(_selectedIndex)) {
       return null;
@@ -145,69 +135,20 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   Widget _buildSalesScreen() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.point_of_sale, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Gestión de Ventas',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Aquí podrás gestionar todas las ventas del sistema',
-            style: TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    // Embed the Sales module so it can provide its own AppBar and UI
+    return createSalesProviderWidget();
   }
 
   Widget _buildPurchasesScreen() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.shopping_cart, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Gestión de Compras',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Aquí podrás gestionar todas las compras del sistema',
-            style: TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    // Use the embeddable Purchases provider widget so the purchases
+    // module can provide its own AppBar and full UI inside AdminHome.
+    return createPurchasesProviderWidget();
   }
 
   Widget _buildClientsScreen() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Gestión de Clientes',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Aquí podrás gestionar todos los clientes del sistema',
-            style: TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    // Inserta el widget embebido del módulo de clientes
+    // que reutiliza el mismo CustomersNotifier y repositorio.
+    return CustomersListPage();
   }
 
   Widget _buildMyProfileScreen() {
