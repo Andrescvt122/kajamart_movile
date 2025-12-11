@@ -52,19 +52,19 @@ class Product {
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    int? _tryParseInt(dynamic value) {
+    int? tryParseInt(dynamic value) {
       if (value is int) return value;
       if (value is double) return value.toInt();
       return int.tryParse(value?.toString() ?? '');
     }
 
-    double? _tryParseDouble(dynamic value) {
+    double? tryParseDouble(dynamic value) {
       if (value is int) return value.toDouble();
       if (value is double) return value;
       return double.tryParse(value?.toString() ?? '');
     }
 
-    bool? _tryParseBool(dynamic value) {
+    bool? tryParseBool(dynamic value) {
       if (value is bool) return value;
       if (value is num) return value != 0;
       final String stringValue = value?.toString().toLowerCase() ?? '';
@@ -73,7 +73,7 @@ class Product {
       return null;
     }
 
-    DateTime? _tryParseDate(dynamic value) {
+    DateTime? tryParseDate(dynamic value) {
       if (value is DateTime) return value;
       if (value is String && value.isNotEmpty) {
         return DateTime.tryParse(value);
@@ -97,24 +97,24 @@ class Product {
             : null;
 
     return Product(
-      id: _tryParseInt(json['id_producto']) ?? 0,
+      id: tryParseInt(json['id_producto']) ?? 0,
       name: json['nombre']?.toString() ?? '',
       description: json['descripcion']?.toString() ?? '',
-      price: _tryParseDouble(json['precio_venta']),
+      price: tryParseDouble(json['precio_venta']),
       imageUrl: json['url_imagen']?.toString(),
-      stockActual: _tryParseInt(json['stock_actual']),
-      stockMinimo: _tryParseInt(json['stock_minimo']),
-      stockMaximo: _tryParseInt(json['stock_maximo']),
-      isActive: _tryParseBool(json['estado']),
-      iva: _tryParseDouble(json['iva']),
-      icu: _tryParseDouble(json['icu']),
-      percentageIncrement: _tryParseDouble(json['porcentaje_incremento']),
-      costUnit: _tryParseDouble(json['costo_unitario']),
-      createdAt: _tryParseDate(json['created_at']),
-      updatedAt: _tryParseDate(json['updated_at']),
+      stockActual: tryParseInt(json['stock_actual']),
+      stockMinimo: tryParseInt(json['stock_minimo']),
+      stockMaximo: tryParseInt(json['stock_maximo']),
+      isActive: tryParseBool(json['estado']),
+      iva: tryParseDouble(json['iva']),
+      icu: tryParseDouble(json['icu']),
+      percentageIncrement: tryParseDouble(json['porcentaje_incremento']),
+      costUnit: tryParseDouble(json['costo_unitario']),
+      createdAt: tryParseDate(json['created_at']),
+      updatedAt: tryParseDate(json['updated_at']),
       categoryName: categoryData?['nombre_categoria']?.toString(),
       categoryDescription: categoryData?['descripcion_categoria']?.toString(),
-      categoryState: _tryParseBool(categoryData?['estado']),
+      categoryState: tryParseBool(categoryData?['estado']),
       details: parsedDetails,
     );
   }
@@ -138,13 +138,13 @@ class ProductDetail {
   final bool? isActive;
 
   factory ProductDetail.fromJson(Map<String, dynamic> json) {
-    int? _tryParseInt(dynamic value) {
+    int? tryParseInt(dynamic value) {
       if (value is int) return value;
       if (value is double) return value.toInt();
       return int.tryParse(value?.toString() ?? '');
     }
 
-    DateTime? _tryParseDate(dynamic value) {
+    DateTime? tryParseDate(dynamic value) {
       if (value is DateTime) return value;
       if (value is String && value.isNotEmpty) {
         return DateTime.tryParse(value);
@@ -152,7 +152,7 @@ class ProductDetail {
       return null;
     }
 
-    bool? _tryParseBool(dynamic value) {
+    bool? tryParseBool(dynamic value) {
       if (value is bool) return value;
       if (value is num) return value != 0;
       final String stringValue = value?.toString().toLowerCase() ?? '';
@@ -162,12 +162,12 @@ class ProductDetail {
     }
 
     return ProductDetail(
-      id: _tryParseInt(json['id_detalle_producto']) ?? 0,
+      id: tryParseInt(json['id_detalle_producto']) ?? 0,
       barcode: json['codigo_barras_producto_compra']?.toString() ?? 'S/D',
-      expirationDate: _tryParseDate(json['fecha_vencimiento']),
-      stock: _tryParseInt(json['stock_producto']),
-      isReturn: _tryParseBool(json['es_devolucion']),
-      isActive: _tryParseBool(json['estado']),
+      expirationDate: tryParseDate(json['fecha_vencimiento']),
+      stock: tryParseInt(json['stock_producto']),
+      isReturn: tryParseBool(json['es_devolucion']),
+      isActive: tryParseBool(json['estado']),
     );
   }
 }
@@ -253,7 +253,7 @@ class ProductDetailScreen extends StatelessWidget {
               const SizedBox(height: 8),
               ...product.details
                   .map((detail) => _ProductDetailCard(detail: detail))
-                  .toList(),
+                  ,
             ],
           ],
         ),
