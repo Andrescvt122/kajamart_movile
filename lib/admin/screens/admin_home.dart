@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
-import '../services/data_service.dart';
 import 'product_list.dart';
 import 'provider_list.dart';
 
@@ -115,7 +114,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   Widget _buildProductsScreen() {
-    return ProductListScreen(products: DataService.sampleProducts);
+    return const ProductListScreen();
   }
 
   Widget _buildSalesScreen() {
