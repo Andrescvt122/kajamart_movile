@@ -5,7 +5,7 @@ import '../models/product.dart';
 import '../models/batch.dart';
 
 class ProductDetailScreen extends StatelessWidget {
-  const ProductDetailScreen({Key? key}) : super(key: key);
+  const ProductDetailScreen({super.key});
 
   Widget _row(String label, String value) {
     return Padding(

@@ -1,0 +1,298 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../data/datasources/sales_remote_data_source.dart';
+import '../../data/repositories/sales_repository_impl.dart';
+import '../providers/sales_notifier.dart';
+import '../widgets/sale_card.dart';
+import 'sale_detail_page.dart';
+
+class SalesListPage extends StatelessWidget {
+  const SalesListPage({super.key});
+
+  static SalesRepositoryImpl createSalesRepository() {
+    const String baseUrl = 'http://localhost:3000/kajamart/api';
+    return SalesRepositoryImpl(remote: SalesRemoteDataSource(baseUrl: baseUrl));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) =>
+          SalesNotifier(repository: createSalesRepository())..loadSales(),
+      child: const _SalesListView(),
+    );
+  }
+}
+
+class _SalesListView extends StatefulWidget {
+  const _SalesListView();
+
+  @override
+  State<_SalesListView> createState() => _SalesListViewState();
+}
+
+class _SalesListViewState extends State<_SalesListView> {
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SalesNotifier>(
+      builder: (context, notifier, _) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Ventas'), elevation: 0),
+          body: SalesListEmbedBody(searchController: _searchController),
+        );
+      },
+    );
+  }
+}
+
+class SalesListEmbedBody extends StatelessWidget {
+  final TextEditingController searchController;
+  final bool showSearchAndFilters;
+
+  const SalesListEmbedBody({
+    super.key,
+    required this.searchController,
+    this.showSearchAndFilters = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SalesNotifier>(
+      builder: (context, notifier, _) {
+        return Column(
+          children: [
+            if (showSearchAndFilters) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por cliente o ID...',
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Color(0xFF00C853),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onChanged: (v) => notifier.filterByQuery(v),
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  itemCount: 3,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final labels = ['Todos', 'Completadas', 'Anuladas'];
+                    final label = labels[index];
+                    return ChoiceChip(
+                      label: Text(label, style: TextStyle(color: Colors.black)),
+                      selected: false,
+                      selectedColor: const Color(0xFF00C853),
+                      backgroundColor: const Color(0xFFE8F5E9),
+                      onSelected: (_) => notifier.setStateFilter(label),
+                    );
+                  },
+                ),
+              ),
+              const Divider(height: 1),
+            ],
+            Expanded(child: _SalesContent()),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SalesContent extends StatelessWidget {
+  const _SalesContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final notifier = Provider.of<SalesNotifier>(context);
+
+    switch (notifier.status) {
+      case SalesStatus.loading:
+        return const Center(
+          child: CircularProgressIndicator(color: Color(0xFF00C853)),
+        );
+      case SalesStatus.error:
+        return Center(child: Text('Error: ${notifier.errorMessage}'));
+      case SalesStatus.loaded:
+        if (notifier.filteredSales.isEmpty)
+          return const Center(child: Text('No se encontraron ventas'));
+        return ListView.builder(
+          padding: const EdgeInsets.only(bottom: 16),
+          itemCount: notifier.filteredSales.length,
+          itemBuilder: (context, index) {
+            final s = notifier.filteredSales[index];
+            return SaleCard(
+              sale: s,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SaleDetailPage(sale: s)),
+              ),
+            );
+          },
+        );
+      case SalesStatus.initial:
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+}
+
+Widget createSalesProviderWidget() {
+  return ChangeNotifierProvider(
+    create: (_) => SalesNotifier(
+      repository: SalesRepositoryImpl(
+        remote: SalesRemoteDataSource(
+          baseUrl: 'http://localhost:3000/kajamart/api',
+        ),
+      ),
+    )..loadSales(),
+    child: const _SalesEmbedWrapper(),
+  );
+}
+
+class _SalesEmbedWrapper extends StatefulWidget {
+  const _SalesEmbedWrapper();
+  @override
+  State<_SalesEmbedWrapper> createState() => _SalesEmbedWrapperState();
+}
+
+class _SalesEmbedWrapperState extends State<_SalesEmbedWrapper> {
+  late TextEditingController _searchController;
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFE8F5E9),
+        elevation: 0,
+        title: const Text('Ventas'),
+        centerTitle: true,
+        titleTextStyle: const TextStyle(
+          color: Color(0xFF1F1F1F),
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
+      body: _EmbeddedSalesScreen(searchController: _searchController),
+    );
+  }
+}
+
+class _EmbeddedSalesScreen extends StatefulWidget {
+  final TextEditingController searchController;
+  const _EmbeddedSalesScreen({required this.searchController});
+  @override
+  State<_EmbeddedSalesScreen> createState() => _EmbeddedSalesScreenState();
+}
+
+class _EmbeddedSalesScreenState extends State<_EmbeddedSalesScreen> {
+  String _selectedFilter = 'Todos';
+  final List<String> _filters = ['Todos', 'Completadas', 'Anuladas'];
+  @override
+  Widget build(BuildContext context) {
+    final notifier = Provider.of<SalesNotifier>(context, listen: false);
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: TextField(
+            controller: widget.searchController,
+            onChanged: (v) => notifier.filterByQuery(v),
+            decoration: InputDecoration(
+              hintText: 'Buscar venta...',
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF00C853)),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 0,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF00C853)),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 50,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            itemCount: _filters.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final filter = _filters[index];
+              final isSelected = filter == _selectedFilter;
+              return ChoiceChip(
+                label: Text(
+                  filter,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : const Color(0xFF1F1F1F),
+                  ),
+                ),
+                selected: isSelected,
+                selectedColor: const Color(0xFF00C853),
+                backgroundColor: const Color(0xFFE8F5E9),
+                onSelected: (_) {
+                  setState(() => _selectedFilter = filter);
+                  notifier.setStateFilter(filter);
+                },
+              );
+            },
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: SalesListEmbedBody(
+            searchController: widget.searchController,
+            showSearchAndFilters: false,
+          ),
+        ),
+      ],
+    );
+  }
+}

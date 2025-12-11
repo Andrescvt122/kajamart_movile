@@ -4,7 +4,7 @@ import '../constants/app_constants.dart';
 import '../models/product.dart';
 
 class ProductBatchesScreen extends StatefulWidget {
-  const ProductBatchesScreen({Key? key}) : super(key: key);
+  const ProductBatchesScreen({super.key});
 
   @override
   State<ProductBatchesScreen> createState() => _ProductBatchesScreenState();
