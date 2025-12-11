@@ -7,6 +7,7 @@ import '../../domain/repositories/customers_repository.dart';
 import '../providers/customers_notifier.dart';
 import '../widgets/customer_card.dart';
 import 'customer_detail_page.dart';
+import 'package:kajamart_movile/admin/constants/app_constants.dart';
 
 /// Página principal del módulo de clientes (ruta dedicada '/clientes').
 class CustomersListPage extends StatelessWidget {
@@ -80,15 +81,19 @@ class _CustomersListViewState extends State<_CustomersListView> {
     return Consumer<CustomersNotifier>(
       builder: (context, notifier, _) {
         return Scaffold(
+          backgroundColor: const Color(0xFFFFFFFF),
           appBar: AppBar(
-            title: const Text('Clientes'),
+            backgroundColor: const Color(
+              0xFFE8F5E9,
+            ), // soft green like screenshot
             elevation: 0,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.home_outlined),
-                onPressed: () => Navigator.pushNamed(context, '/home'),
-              ),
-            ],
+            title: const Text('Clientes'),
+            centerTitle: true,
+            titleTextStyle: const TextStyle(
+              color: Color(0xFF1F1F1F),
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
           body: CustomersListEmbedBody(searchController: _searchController),
         );
@@ -167,12 +172,7 @@ class CustomersListEmbedBody extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (notifier.filteredCustomers.isNotEmpty)
-                      TextButton.icon(
-                        icon: const Icon(Icons.refresh, size: 16),
-                        label: const Text('Recargar'),
-                        onPressed: notifier.loadCustomers,
-                      ),
+                    // No mostrar botón de recarga aquí (pide el usuario).
                   ],
                 ),
               ),
