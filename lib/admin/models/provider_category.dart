@@ -16,10 +16,48 @@ class ProviderCategory {
     }
 
     if (json is Map<String, dynamic>) {
-      final id = (json['id'] ?? json['uuid'] ?? json['code'] ?? '').toString();
-      final name = (json['name'] ?? json['title'] ?? json['label'] ?? '').toString();
-      final description =
-          (json['description'] ?? json['details'] ?? json['summary'] ?? '').toString();
+      final nested = json['categorias'];
+      final nestedMap = nested is Map<String, dynamic>
+          ? Map<String, dynamic>.from(nested)
+          : null;
+      final sources = [if (nestedMap != null) nestedMap, json];
+
+      String readValue(List<String> keys) {
+        for (final source in sources) {
+          for (final key in keys) {
+            if (source.containsKey(key) && source[key] != null) {
+              final value = source[key].toString().trim();
+              if (value.isNotEmpty) {
+                return value;
+              }
+            }
+          }
+        }
+        return '';
+      }
+
+      final id = readValue([
+        'id',
+        'uuid',
+        'code',
+        'id_categoria',
+        'idCategory',
+        'id_proveedor_categoria',
+      ]);
+      final name = readValue([
+        'name',
+        'title',
+        'label',
+        'nombre',
+        'nombre_categoria',
+      ]);
+      final description = readValue([
+        'description',
+        'details',
+        'summary',
+        'descripcion',
+        'descripcion_categoria',
+      ]);
 
       final resolvedName = name.isEmpty ? 'Sin categoría' : name;
       final resolvedId = id.isEmpty ? resolvedName : id;
