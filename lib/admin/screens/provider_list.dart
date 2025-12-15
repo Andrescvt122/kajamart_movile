@@ -51,7 +51,8 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       list = list.where(
-        (p) => p.name.toLowerCase().contains(query) ||
+        (p) =>
+            p.name.toLowerCase().contains(query) ||
             p.contactName.toLowerCase().contains(query) ||
             p.nit.toLowerCase().contains(query),
       );
@@ -121,9 +122,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
 
   Widget _buildLoadingView() {
     return Center(
-      child: CircularProgressIndicator(
-        color: AppConstants.primaryColor,
-      ),
+      child: CircularProgressIndicator(color: AppConstants.primaryColor),
     );
   }
 
@@ -172,15 +171,10 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                color: Colors.redAccent.shade700,
-              ),
+              style: TextStyle(color: Colors.redAccent.shade700),
             ),
           ),
-          TextButton(
-            onPressed: _onRefresh,
-            child: const Text('Actualizar'),
-          ),
+          TextButton(onPressed: _onRefresh, child: const Text('Actualizar')),
         ],
       ),
     );
@@ -264,10 +258,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                 ? 'No se encontraron proveedores con los filtros aplicados.'
                 : 'No hay proveedores registrados.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: AppConstants.textDarkColor,
-            ),
+            style: TextStyle(fontSize: 16, color: AppConstants.textDarkColor),
           ),
         ],
       ),
@@ -304,7 +295,10 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -363,22 +357,26 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                             runSpacing: 4,
                             children: provider.categories.isNotEmpty
                                 ? provider.categories
-                                    .map(
-                                      (category) => Chip(
-                                        label: Text(
-                                          category.name,
-                                          style: const TextStyle(fontSize: 11),
+                                      .map(
+                                        (category) => Chip(
+                                          label: Text(
+                                            category.name,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                          backgroundColor: AppConstants
+                                              .secondaryColor
+                                              .withOpacity(0.2),
                                         ),
-                                        backgroundColor: AppConstants.secondaryColor
-                                            .withOpacity(0.2),
-                                      ),
-                                    )
-                                    .toList()
+                                      )
+                                      .toList()
                                 : [
                                     Chip(
                                       label: const Text('Sin categorías'),
-                                      backgroundColor:
-                                          AppConstants.secondaryColor.withOpacity(0.2),
+                                      backgroundColor: AppConstants
+                                          .secondaryColor
+                                          .withOpacity(0.2),
                                     ),
                                   ],
                           ),
@@ -387,10 +385,14 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color:
-                            Color(provider.status.colorValue).withOpacity(0.1),
+                        color: Color(
+                          provider.status.colorValue,
+                        ).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: Color(provider.status.colorValue),
