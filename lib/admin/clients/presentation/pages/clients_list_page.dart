@@ -82,7 +82,7 @@ class ClientsListEmbedBody extends StatelessWidget {
               child: Text(
                 'Clientes',
                 style: TextStyle(
-                  fontSize: 44,
+                  fontSize: 36,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0E6E54),
                   height: 0.95,
@@ -94,7 +94,7 @@ class ClientsListEmbedBody extends StatelessWidget {
               child: Text(
                 'Listado de clientes',
                 style: TextStyle(
-                  fontSize: 19,
+                  fontSize: 16,
                   color: Color(0xFF677A70),
                   fontWeight: FontWeight.w500,
                 ),

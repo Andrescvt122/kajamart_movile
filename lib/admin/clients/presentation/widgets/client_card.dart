@@ -72,7 +72,7 @@ class ClientCard extends StatelessWidget {
                       Text(
                         client.nombre,
                         style: const TextStyle(
-                          fontSize: 32,
+                          fontSize: 24,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF121B17),
                           height: 1,
