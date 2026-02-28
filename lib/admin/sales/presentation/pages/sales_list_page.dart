@@ -52,8 +52,10 @@ class _SalesListViewState extends State<_SalesListView> {
     return Consumer<SalesNotifier>(
       builder: (context, notifier, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Ventas'), elevation: 0),
-          body: SalesListEmbedBody(searchController: _searchController),
+          backgroundColor: const Color(0xFFE4EFE8),
+          body: SafeArea(
+            child: SalesListEmbedBody(searchController: _searchController),
+          ),
         );
       },
     );
@@ -75,20 +77,52 @@ class SalesListEmbedBody extends StatelessWidget {
     return Consumer<SalesNotifier>(
       builder: (context, notifier, _) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 20, 18, 2),
+              child: Text(
+                'Ventas',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0E6E54),
+                  height: 0.95,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
+              child: Text(
+                'Listado de ventas',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF677A70),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
             if (showSearchAndFilters) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
                 child: TextField(
                   controller: searchController,
                   decoration: InputDecoration(
-                    hintText: 'Buscar por cliente o ID...',
+                    hintText: 'Buscar ventas...',
                     prefixIcon: const Icon(
                       Icons.search,
-                      color: Color(0xFF00C853),
+                      color: Color(0xFF9AA8A2),
                     ),
+                    hintStyle: const TextStyle(color: Color(0xFF95A39D)),
+                    filled: true,
+                    fillColor: const Color(0xFFF0F2F1),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(28),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
                     ),
                   ),
                   onChanged: (v) => notifier.filterByQuery(v),
@@ -145,7 +179,7 @@ class _SalesContent extends StatelessWidget {
         if (notifier.filteredSales.isEmpty)
           return const Center(child: Text('No se encontraron ventas'));
         return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 24),
           itemCount: notifier.filteredSales.length,
           itemBuilder: (context, index) {
             final s = notifier.filteredSales[index];
@@ -201,18 +235,10 @@ class _SalesEmbedWrapperState extends State<_SalesEmbedWrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFE8F5E9),
-        elevation: 0,
-        title: const Text('Ventas'),
-        centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Color(0xFF1F1F1F),
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
+      backgroundColor: const Color(0xFFE4EFE8),
+      body: SafeArea(
+        child: _EmbeddedSalesScreen(searchController: _searchController),
       ),
-      body: _EmbeddedSalesScreen(searchController: _searchController),
     );
   }
 }
@@ -238,21 +264,22 @@ class _EmbeddedSalesScreenState extends State<_EmbeddedSalesScreen> {
             controller: widget.searchController,
             onChanged: (v) => notifier.filterByQuery(v),
             decoration: InputDecoration(
-              hintText: 'Buscar venta...',
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF00C853)),
+              hintText: 'Buscar ventas...',
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF9AA8A2)),
+              hintStyle: const TextStyle(color: Color(0xFF95A39D)),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFF0F2F1),
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 0,
+                horizontal: 20,
+                vertical: 14,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(28),
+                borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF00C853)),
+                borderRadius: BorderRadius.circular(28),
+                borderSide: const BorderSide(color: Color(0xFF0A7A5A)),
               ),
             ),
           ),

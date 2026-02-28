@@ -68,20 +68,9 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppConstants.secondaryColor,
-        elevation: 0,
-        title: Text(
-          'Proveedores',
-          style: TextStyle(
-            color: AppConstants.textDarkColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: AnimatedBuilder(
+      backgroundColor: const Color(0xFFE4EFE8),
+      body: SafeArea(
+        child: AnimatedBuilder(
         animation: _providerService,
         builder: (context, _) {
           if (_providerService.isLoading && _providers.isEmpty) {
@@ -99,6 +88,29 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.zero,
               children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(18, 20, 18, 2),
+                  child: Text(
+                    'Proveedores',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0E6E54),
+                      height: 0.95,
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
+                  child: Text(
+                    'Listado de proveedores',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF677A70),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
                 if (_providerService.isLoading)
                   const LinearProgressIndicator(minHeight: 2),
                 const SizedBox(height: 12),
@@ -116,6 +128,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             ),
           );
         },
+        ),
       ),
     );
   }
@@ -150,6 +163,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             label: const Text('Reintentar'),
           ),
         ],
+        ),
       ),
     );
   }
@@ -160,7 +174,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.redAccent.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
       ),
       child: Row(
@@ -176,13 +190,14 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
           ),
           TextButton(onPressed: _onRefresh, child: const Text('Actualizar')),
         ],
+        ),
       ),
     );
   }
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
       child: TextField(
         onChanged: (value) {
           setState(() {
@@ -190,22 +205,23 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
           });
         },
         decoration: InputDecoration(
-          hintText: 'Buscar proveedor...',
-          prefixIcon: Icon(Icons.search, color: AppConstants.textLightColor),
+          hintText: 'Buscar proveedores...',
+          prefixIcon: const Icon(Icons.search, color: Color(0xFF9AA8A2)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: const Color(0xFFF0F2F1),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 0,
+            horizontal: 20,
+            vertical: 14,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppConstants.secondaryColor),
+            borderRadius: BorderRadius.circular(28),
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppConstants.textLightColor),
+            borderRadius: BorderRadius.circular(28),
+            borderSide: const BorderSide(color: Color(0xFF0A7A5A)),
           ),
+        ),
         ),
       ),
     );
@@ -216,7 +232,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
       height: 50,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
         itemCount: filters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
@@ -239,6 +255,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             },
           );
         },
+        ),
       ),
     );
   }
@@ -261,6 +278,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             style: TextStyle(fontSize: 16, color: AppConstants.textDarkColor),
           ),
         ],
+        ),
       ),
     );
   }
@@ -282,9 +300,9 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: AppConstants.secondaryColor.withOpacity(0.5),
+                  color: const Color(0xFFC6E8D5),
                 ),
                 boxShadow: [
                   BoxShadow(

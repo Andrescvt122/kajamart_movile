@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart';
 import 'product_list.dart';
 import 'provider_list.dart';
 import '../sales/presentation/pages/sales_list_page.dart';
@@ -16,80 +15,73 @@ class AdminHomeScreen extends StatefulWidget {
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   int _selectedIndex = 0;
 
-  final List<String> _titles = [
-    'Productos',
-    'Proveedores',
-    'Ventas',
-    'Compras',
-    'Clientes',
-    'Ver mi perfil',
-    'Salir',
-  ];
-
-  void _handleLogout() {
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: _buildAppBar(),
+      backgroundColor: const Color(0xFFE4EFE8),
       body: _buildScreenContent(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          if (index == 6) {
-            // Logout - navegar al login
-            _handleLogout();
-          } else {
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.1),
+              blurRadius: 12,
+              offset: Offset(0, -3),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) {
             setState(() {
               _selectedIndex = index;
             });
-          }
-        },
-        selectedItemColor: AppConstants.primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.inventory),
-            label: 'Productos',
+          },
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: const Color(0xFF0A7A5A),
+          unselectedItemColor: const Color(0xFF809487),
+          selectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Proveedores',
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.point_of_sale),
-            label: 'Ventas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Compras',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Clientes'),
-        ],
-      ),
-    );
-  }
-
-  PreferredSizeWidget? _buildAppBar() {
-    const screensWithOwnAppBar = {0, 1, 2, 3, 4, 5};
-
-    if (screensWithOwnAppBar.contains(_selectedIndex)) {
-      return null;
-    }
-
-    return AppBar(
-      title: Text(
-        _titles[_selectedIndex],
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.inventory_2_outlined),
+              activeIcon: Icon(Icons.inventory_2),
+              label: 'Productos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.storefront_outlined),
+              activeIcon: Icon(Icons.storefront),
+              label: 'Proveedores',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.point_of_sale_outlined),
+              activeIcon: Icon(Icons.point_of_sale),
+              label: 'Ventas',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_bag_outlined),
+              activeIcon: Icon(Icons.shopping_bag),
+              label: 'Compras',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.people_alt_outlined),
+              activeIcon: Icon(Icons.people_alt),
+              label: 'Clientes',
+            ),
+          ],
         ),
       ),
-      backgroundColor: AppConstants.primaryColor,
-      elevation: 0,
     );
   }
 

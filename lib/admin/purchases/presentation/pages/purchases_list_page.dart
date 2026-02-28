@@ -56,8 +56,10 @@ class _PurchasesListViewState extends State<_PurchasesListView> {
     return Consumer<PurchasesNotifier>(
       builder: (context, notifier, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Compras'), elevation: 0),
-          body: PurchasesListEmbedBody(searchController: _searchController),
+          backgroundColor: const Color(0xFFE4EFE8),
+          body: SafeArea(
+            child: PurchasesListEmbedBody(searchController: _searchController),
+          ),
         );
       },
     );
@@ -79,20 +81,52 @@ class PurchasesListEmbedBody extends StatelessWidget {
     return Consumer<PurchasesNotifier>(
       builder: (context, notifier, _) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 20, 18, 2),
+              child: Text(
+                'Compras',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0E6E54),
+                  height: 0.95,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
+              child: Text(
+                'Listado de compras',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF677A70),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
             if (showSearchAndFilters) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
                 child: TextField(
                   controller: searchController,
                   decoration: InputDecoration(
-                    hintText: 'Buscar por proveedor o ID...',
+                    hintText: 'Buscar compras...',
                     prefixIcon: const Icon(
                       Icons.search,
-                      color: Color(0xFF00C853),
+                      color: Color(0xFF9AA8A2),
                     ),
+                    hintStyle: const TextStyle(color: Color(0xFF95A39D)),
+                    filled: true,
+                    fillColor: const Color(0xFFF0F2F1),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(28),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
                     ),
                   ),
                   onChanged: (v) => notifier.filterByQuery(v),
@@ -170,7 +204,7 @@ class _PurchasesContent extends StatelessWidget {
           return Center(child: Text('No se encontraron compras'));
         }
         return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 24),
           itemCount: notifier.filteredPurchases.length,
           itemBuilder: (context, index) {
             final p = notifier.filteredPurchases[index];
@@ -231,18 +265,10 @@ class _PurchasesEmbedWrapperState extends State<_PurchasesEmbedWrapper> {
   Widget build(BuildContext context) {
     // Scaffold styled like Products/Customers
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFE8F5E9),
-        elevation: 0,
-        title: const Text('Compras'),
-        centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Color(0xFF1F1F1F),
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
+      backgroundColor: const Color(0xFFE4EFE8),
+      body: SafeArea(
+        child: _EmbeddedPurchasesScreen(searchController: _searchController),
       ),
-      body: _EmbeddedPurchasesScreen(searchController: _searchController),
     );
   }
 }
@@ -271,21 +297,22 @@ class _EmbeddedPurchasesScreenState extends State<_EmbeddedPurchasesScreen> {
             controller: widget.searchController,
             onChanged: (v) => notifier.filterByQuery(v),
             decoration: InputDecoration(
-              hintText: 'Buscar compra...',
-              prefixIcon: const Icon(Icons.search, color: Color(0xFF00C853)),
+              hintText: 'Buscar compras...',
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF9AA8A2)),
+              hintStyle: const TextStyle(color: Color(0xFF95A39D)),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFFF0F2F1),
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 0,
+                horizontal: 20,
+                vertical: 14,
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(28),
+                borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF00C853)),
+                borderRadius: BorderRadius.circular(28),
+                borderSide: const BorderSide(color: Color(0xFF0A7A5A)),
               ),
             ),
           ),

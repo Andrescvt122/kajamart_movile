@@ -52,8 +52,10 @@ class _ClientsListViewState extends State<_ClientsListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Clientes'), elevation: 0),
-      body: ClientsListEmbedBody(searchController: _searchController),
+      backgroundColor: const Color(0xFFE4EFE8),
+      body: SafeArea(
+        child: ClientsListEmbedBody(searchController: _searchController),
+      ),
     );
   }
 }
@@ -73,17 +75,52 @@ class ClientsListEmbedBody extends StatelessWidget {
     return Consumer<ClientsNotifier>(
       builder: (context, notifier, _) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 20, 18, 2),
+              child: Text(
+                'Clientes',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0E6E54),
+                  height: 0.95,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
+              child: Text(
+                'Listado de clientes',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF677A70),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
             if (showSearch)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
                 child: TextField(
                   controller: searchController,
                   decoration: InputDecoration(
-                    hintText: 'Buscar cliente...',
-                    prefixIcon: const Icon(Icons.search, color: Color(0xFF00C853)),
+                    hintText: 'Buscar clientes...',
+                    hintStyle: const TextStyle(color: Color(0xFF95A39D)),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Color(0xFF9AA8A2),
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF0F2F1),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(28),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
                     ),
                   ),
                   onChanged: notifier.filterByQuery,
@@ -105,7 +142,7 @@ class _ClientsContent extends StatelessWidget {
     switch (notifier.status) {
       case ClientsStatus.loading:
         return const Center(
-          child: CircularProgressIndicator(color: Color(0xFF00C853)),
+          child: CircularProgressIndicator(color: Color(0xFF0A7A5A)),
         );
       case ClientsStatus.error:
         return Center(child: Text('Error: ${notifier.errorMessage}'));
@@ -114,7 +151,7 @@ class _ClientsContent extends StatelessWidget {
           return const Center(child: Text('No se encontraron clientes'));
         }
         return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 24),
           itemCount: notifier.filteredClients.length,
           itemBuilder: (context, index) {
             final client = notifier.filteredClients[index];
@@ -174,20 +211,12 @@ class _ClientsEmbedWrapperState extends State<_ClientsEmbedWrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFE8F5E9),
-        elevation: 0,
-        title: const Text('Clientes'),
-        centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Color(0xFF1F1F1F),
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
+      backgroundColor: const Color(0xFFE4EFE8),
+      body: SafeArea(
+        child: ClientsListEmbedBody(
+          searchController: _searchController,
+          showSearch: true,
         ),
-      ),
-      body: ClientsListEmbedBody(
-        searchController: _searchController,
-        showSearch: true,
       ),
     );
   }
