@@ -71,22 +71,10 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
       backgroundColor: const Color(0xFFE4EFE8),
       body: SafeArea(
         child: AnimatedBuilder(
-        animation: _providerService,
-        builder: (context, _) {
-          if (_providerService.isLoading && _providers.isEmpty) {
-            return _buildLoadingView();
-          }
-
-          if (_providerService.errorMessage != null && _providers.isEmpty) {
-            return _buildErrorView();
-          }
-
-          return RefreshIndicator(
-            onRefresh: _onRefresh,
-            color: AppConstants.primaryColor,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
+          animation: _providerService,
+          builder: (context, _) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Padding(
                   padding: EdgeInsets.fromLTRB(18, 20, 18, 2),
@@ -111,24 +99,49 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                     ),
                   ),
                 ),
-                if (_providerService.isLoading)
-                  const LinearProgressIndicator(minHeight: 2),
-                const SizedBox(height: 12),
                 _buildSearchBar(),
                 _buildFilterChips(),
                 const Divider(height: 1),
-                if (_providerService.errorMessage != null)
-                  _buildInlineError(_providerService.errorMessage!),
-                if (filteredProviders.isEmpty)
-                  _buildEmptyState()
-                else
-                  ..._buildProviderCards(filteredProviders),
-                const SizedBox(height: 24),
+                Expanded(
+                  child: Builder(
+                    builder: (_) {
+                      if (_providerService.isLoading && _providers.isEmpty) {
+                        return _buildLoadingView();
+                      }
+
+                      if (_providerService.errorMessage != null &&
+                          _providers.isEmpty) {
+                        return _buildErrorView();
+                      }
+
+                      if (filteredProviders.isEmpty) {
+                        return _buildEmptyState();
+                      }
+
+                      return ListView(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 24),
+                        children: [
+                          if (_providerService.isLoading)
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: LinearProgressIndicator(minHeight: 2),
+                            ),
+                          if (_providerService.errorMessage != null)
+                            _buildInlineError(_providerService.errorMessage!),
+                          ..._buildProviderCards(filteredProviders),
+                        ],
+                      );
+                    },
+                  ),
+                ),
               ],
-            ),
-          );
-        },
+            );
+          },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _onRefresh,
+        child: const Icon(Icons.refresh),
       ),
     );
   }
@@ -163,7 +176,6 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             label: const Text('Reintentar'),
           ),
         ],
-        ),
       ),
     );
   }
@@ -173,9 +185,9 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.redAccent.withOpacity(0.1),
+        color: Colors.redAccent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +202,6 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
           ),
           TextButton(onPressed: _onRefresh, child: const Text('Actualizar')),
         ],
-        ),
       ),
     );
   }
@@ -206,6 +217,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
         },
         decoration: InputDecoration(
           hintText: 'Buscar proveedores...',
+          hintStyle: const TextStyle(color: Color(0xFF95A39D)),
           prefixIcon: const Icon(Icons.search, color: Color(0xFF9AA8A2)),
           filled: true,
           fillColor: const Color(0xFFF0F2F1),
@@ -221,7 +233,6 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             borderRadius: BorderRadius.circular(28),
             borderSide: const BorderSide(color: Color(0xFF0A7A5A)),
           ),
-        ),
         ),
       ),
     );
@@ -246,8 +257,8 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
               ),
             ),
             selected: isSelected,
-            selectedColor: AppConstants.textLightColor,
-            backgroundColor: AppConstants.secondaryColor.withOpacity(0.3),
+            selectedColor: const Color(0xFF0A7A5A),
+            backgroundColor: const Color(0xFFDDECE4),
             onSelected: (_) {
               setState(() {
                 _selectedFilter = filter;
@@ -255,7 +266,6 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             },
           );
         },
-        ),
       ),
     );
   }
@@ -264,20 +274,26 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
     final hasActiveFilter =
         _selectedFilter != 'Todos' || _searchQuery.trim().isNotEmpty;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-      child: Column(
-        children: [
-          Icon(Icons.inventory_2, size: 60, color: AppConstants.textLightColor),
-          const SizedBox(height: 16),
-          Text(
-            hasActiveFilter
-                ? 'No se encontraron proveedores con los filtros aplicados.'
-                : 'No hay proveedores registrados.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: AppConstants.textDarkColor),
-          ),
-        ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.inventory_2,
+              size: 60,
+              color: AppConstants.textLightColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              hasActiveFilter
+                  ? 'No se encontraron proveedores con los filtros aplicados.'
+                  : 'No hay proveedores registrados.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: AppConstants.textDarkColor),
+            ),
+          ],
         ),
       ),
     );
@@ -306,7 +322,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 5,
                     offset: const Offset(0, 3),
                   ),
@@ -385,7 +401,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                                           ),
                                           backgroundColor: AppConstants
                                               .secondaryColor
-                                              .withOpacity(0.2),
+                                              .withValues(alpha: 0.2),
                                         ),
                                       )
                                       .toList()
@@ -394,7 +410,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                                       label: const Text('Sin categorías'),
                                       backgroundColor: AppConstants
                                           .secondaryColor
-                                          .withOpacity(0.2),
+                                          .withValues(alpha: 0.2),
                                     ),
                                   ],
                           ),
@@ -410,7 +426,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                       decoration: BoxDecoration(
                         color: Color(
                           provider.status.colorValue,
-                        ).withOpacity(0.1),
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: Color(provider.status.colorValue),

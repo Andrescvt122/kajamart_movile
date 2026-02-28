@@ -92,7 +92,7 @@ class SaleCard extends StatelessWidget {
                   Text(
                     '\$${sale.total.toStringAsFixed(0)}',
                     style: const TextStyle(
-                      color: Color(0xFF00C853),
+                      color: Color(0xFF121B17),
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -13,6 +13,7 @@ class ClientsNotifier extends ChangeNotifier {
   List<AdminClientModel> filteredClients = [];
   String errorMessage = '';
   String _searchQuery = '';
+  String _stateFilter = 'Todos';
 
   ClientsNotifier({required this.repository});
 
@@ -35,15 +36,34 @@ class ClientsNotifier extends ChangeNotifier {
     _applyFilters();
   }
 
+  void setStateFilter(String state) {
+    _stateFilter = state;
+    _applyFilters();
+  }
+
+  bool _isActiveClient(AdminClientModel client) {
+    final status = client.estado.trim().toLowerCase();
+    if (status.contains('inactiv')) return false;
+    return status.contains('activ');
+  }
+
   void _applyFilters() {
-    if (_searchQuery.isEmpty) {
-      filteredClients = clients;
-    } else {
-      filteredClients = clients.where((c) {
+    List<AdminClientModel> list = clients;
+
+    if (_stateFilter == 'Activos') {
+      list = list.where(_isActiveClient).toList();
+    } else if (_stateFilter == 'Inactivos') {
+      list = list.where((c) => !_isActiveClient(c)).toList();
+    }
+
+    if (_searchQuery.isNotEmpty) {
+      list = list.where((c) {
         return c.nombre.toLowerCase().contains(_searchQuery) ||
             c.numeroDocumento.toLowerCase().contains(_searchQuery);
       }).toList();
     }
+
+    filteredClients = list;
     notifyListeners();
   }
 }
