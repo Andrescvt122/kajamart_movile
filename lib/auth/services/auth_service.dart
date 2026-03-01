@@ -1,13 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/auth_session.dart';
 
 class AuthService {
-  static const String _baseUrl = 'http://localhost:3000/kajamart/api';
-
   static const String _tokenKey = 'kajamart_token';
 
   Future<AuthSession> login({
@@ -15,7 +14,7 @@ class AuthService {
     required String password,
   }) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/auth/login'),
+      Uri.parse('${_baseUrl}/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email.trim(), 'password': password}),
     );
@@ -95,7 +94,7 @@ class AuthService {
     required String token,
   }) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/users/$userId'),
+      Uri.parse('${_baseUrl}/users/$userId'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -120,7 +119,7 @@ class AuthService {
 
   Future<Map<String, dynamic>> _getRoleById(int roleId) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/roles/$roleId'),
+      Uri.parse('${_baseUrl}/roles/$roleId'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -170,5 +169,19 @@ class AuthService {
     if (value is int) return value;
     if (value is String) return int.tryParse(value.trim()) ?? 0;
     return 0;
+  }
+
+  String get _baseUrl {
+    const apiPath = '/kajamart/api';
+
+    if (kIsWeb) {
+      return 'http://localhost:3000$apiPath';
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:3000$apiPath';
+    }
+
+    return 'http://localhost:3000$apiPath';
   }
 }

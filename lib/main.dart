@@ -48,31 +48,61 @@ class _AuthGate extends StatelessWidget {
       );
     }
 
-    if (!_isMobilePlatform) {
-      return const Scaffold(
-        body: Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'Esta aplicación solo permite acceso desde móvil (Android/iOS).',
-              textAlign: TextAlign.center,
+    final session = auth.session;
+    final home = session == null ? const LoginPage() : AdminHomeScreen(session: session);
+
+    if (_isStrictMobilePlatform) {
+      return home;
+    }
+
+    if (_isDesktopDebugMode) {
+      return Stack(
+        children: [
+          home,
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 12,
+            child: Material(
+              color: Colors.amber.shade100,
+              borderRadius: BorderRadius.circular(10),
+              child: const Padding(
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  'Modo pruebas en PC habilitado. En producción el acceso sigue siendo móvil.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       );
     }
 
-    final session = auth.session;
-    if (session == null) {
-      return const LoginPage();
-    }
-
-    return AdminHomeScreen(session: session);
+    return const Scaffold(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Esta aplicación solo permite acceso desde móvil (Android/iOS).',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
   }
 
-  bool get _isMobilePlatform {
+  bool get _isStrictMobilePlatform {
     if (kIsWeb) return false;
     return defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
+  }
+
+  bool get _isDesktopDebugMode {
+    return !kIsWeb &&
+        kDebugMode &&
+        (defaultTargetPlatform == TargetPlatform.macOS ||
+            defaultTargetPlatform == TargetPlatform.windows ||
+            defaultTargetPlatform == TargetPlatform.linux);
   }
 }
