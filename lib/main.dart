@@ -1,12 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'admin/screens/admin_home.dart';
-import 'admin/screens/provider_detail.dart';
-import 'admin/screens/product_batches.dart';
-import 'admin/models/provider.dart';
-import 'admin/models/product.dart';
+import 'auth/presentation/pages/login_page.dart';
+import 'auth/presentation/providers/auth_notifier.dart';
 
 void main() {
-  runApp(const KajamartApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthNotifier()..init(),
+      child: const KajamartApp(),
+    ),
+  );
 }
 
 class KajamartApp extends StatelessWidget {
@@ -24,27 +30,49 @@ class KajamartApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.grey[100],
         fontFamily: 'Roboto',
       ),
-      // Usamos `home` en vez de `initialRoute` para asegurar una única raíz Navigator
-      home: const AdminHomeScreen(),
-      routes: {
-        // Ruta de login temporal que apunta a la pantalla principal mientras se implementa
-        '/login': (context) => const AdminHomeScreen(),
-        '/admin-home': (context) => const AdminHomeScreen(),
-        '/provider-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
-          if (args != null && args is Provider) {
-            return ProviderDetailScreen(provider: args);
-          }
-          return const ProviderDetailScreen();
-        },
-        '/batches': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
-          if (args != null && args is Product) {
-            return ProductBatchesScreen();
-          }
-          return const ProductBatchesScreen();
-        },
-      },
+      home: const _AuthGate(),
     );
+  }
+}
+
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthNotifier>();
+
+    if (auth.isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!_isMobilePlatform) {
+      return const Scaffold(
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'Esta aplicación solo permite acceso desde móvil (Android/iOS).',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final session = auth.session;
+    if (session == null) {
+      return const LoginPage();
+    }
+
+    return AdminHomeScreen(session: session);
+  }
+
+  bool get _isMobilePlatform {
+    if (kIsWeb) return false;
+    return defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
   }
 }
