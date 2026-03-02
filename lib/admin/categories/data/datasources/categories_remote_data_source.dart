@@ -3,31 +3,30 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/purchase_model.dart';
+import '../models/category_model.dart';
 
-/// Remote data source for purchases.
-class PurchasesRemoteDataSource {
+class CategoriesRemoteDataSource {
   final String baseUrl;
-  final String purchasesEndpoint;
+  final String categoriesEndpoint;
   final http.Client httpClient;
   final Map<String, String>? defaultHeaders;
 
-  PurchasesRemoteDataSource({
+  CategoriesRemoteDataSource({
     required this.baseUrl,
-    this.purchasesEndpoint = '/purchase',
+    this.categoriesEndpoint = '/categories',
     http.Client? httpClient,
     this.defaultHeaders,
   }) : httpClient = httpClient ?? http.Client();
 
-  Future<List<PurchaseModel>> fetchPurchases({bool useMockData = false}) async {
+  Future<List<CategoryModel>> fetchCategories({bool useMockData = false}) async {
     if (useMockData || baseUrl.isEmpty) {
-      await Future.delayed(const Duration(milliseconds: 600));
-      return mockPurchases;
+      await Future.delayed(const Duration(milliseconds: 400));
+      return mockCategories;
     }
 
     try {
-      final uri = Uri.parse('$baseUrl$purchasesEndpoint');
-      debugPrint('[Compras] GET $uri');
+      final uri = Uri.parse('$baseUrl$categoriesEndpoint');
+      debugPrint('[Categorias] GET $uri');
 
       final headers = <String, String>{
         'Accept': 'application/json',
@@ -42,38 +41,32 @@ class PurchasesRemoteDataSource {
             onTimeout: () => throw Exception('Timeout >15s'),
           );
 
-      debugPrint('[Compras] status: ${response.statusCode}');
+      debugPrint('[Categorias] status: ${response.statusCode}');
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final items = _extractItems(data);
-        final purchases = items.map(PurchaseModel.fromJson).toList();
-        debugPrint('[Compras] loaded: ${purchases.length}');
-        return purchases;
-      } else if (response.statusCode == 401) {
-        throw Exception('No autorizado (401)');
-      } else if (response.statusCode == 404) {
-        throw Exception('Endpoint no encontrado (404): $purchasesEndpoint');
-      } else if (response.statusCode == 500) {
-        throw Exception('Error en servidor (500)');
-      } else {
-        throw Exception('HTTP ${response.statusCode}: ${response.body}');
+        final categories = items.map(CategoryModel.fromJson).toList();
+        debugPrint('[Categorias] loaded: ${categories.length}');
+        return categories;
       }
+
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
     } on http.ClientException catch (e) {
-      debugPrint('[Compras] ClientException: ${e.message}');
+      debugPrint('[Categorias] ClientException: ${e.message}');
       if (kIsWeb) {
-        debugPrint('[Compras] Web fallback to mock');
-        await Future.delayed(const Duration(milliseconds: 300));
-        return mockPurchases;
+        debugPrint('[Categorias] Web fallback to mock');
+        await Future.delayed(const Duration(milliseconds: 200));
+        return mockCategories;
       }
       throw Exception('Error de conexion: ${e.message}');
     } catch (e) {
-      debugPrint('[Compras] unexpected: ${e.toString()}');
+      debugPrint('[Categorias] error: $e');
       if (kIsWeb && e.toString().contains('CORS')) {
-        debugPrint('[Compras] Web CORS fallback');
-        await Future.delayed(const Duration(milliseconds: 300));
-        return mockPurchases;
+        debugPrint('[Categorias] Web CORS fallback');
+        await Future.delayed(const Duration(milliseconds: 200));
+        return mockCategories;
       }
-      throw Exception('Error: ${e.toString()}');
+      throw Exception('Error: $e');
     }
   }
 
@@ -88,11 +81,10 @@ class PurchasesRemoteDataSource {
     if (data is Map) {
       final map = Map<String, dynamic>.from(data);
       final candidates = [
-        map['purchase'],
-        map['purchases'],
+        map['categories'],
+        map['category'],
         map['data'],
       ];
-
       for (final candidate in candidates) {
         if (candidate is List) {
           return candidate
@@ -106,3 +98,7 @@ class PurchasesRemoteDataSource {
     return const <Map<String, dynamic>>[];
   }
 }
+
+const List<CategoryModel> _mockCategories = [];
+
+List<CategoryModel> get mockCategories => _mockCategories;

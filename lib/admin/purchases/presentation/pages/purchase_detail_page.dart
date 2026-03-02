@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+
 import '../../data/models/purchase_model.dart';
 
 class PurchaseDetailPage extends StatelessWidget {
   final PurchaseModel purchase;
+  static const Color _primaryGreen = Color(0xFF0A7A5A);
 
   const PurchaseDetailPage({super.key, required this.purchase});
 
   @override
   Widget build(BuildContext context) {
+    final isCompleted = purchase.estadoCompra.toLowerCase().contains('complet');
+    final supplierName = purchase.proveedor?.nombre ?? 'Proveedor';
+    final dateLabel = purchase.fechaCompra.toLocal().toString().split(' ').first;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalle de Compra'),
-        backgroundColor: const Color(0xFF00C853),
+        backgroundColor: _primaryGreen,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -31,18 +37,16 @@ class PurchaseDetailPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            purchase.proveedor?.nombre ?? 'Proveedor',
+                            supplierName,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Text(
-                            'Fecha: ${purchase.fechaCompra.toLocal().toString().split(' ').first}',
-                          ),
+                          Text('Factura: #${purchase.id}'),
                           const SizedBox(height: 6),
-                          Text('ID: ${purchase.id}'),
+                          Text('Fecha: $dateLabel'),
                         ],
                       ),
                     ),
@@ -50,11 +54,15 @@ class PurchaseDetailPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '\$${purchase.total.toStringAsFixed(0)}',
+                          'Subtotal',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                        Text(
+                          '\$${purchase.subtotal.toStringAsFixed(0)}',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF00C853),
+                            color: _primaryGreen,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -64,10 +72,7 @@ class PurchaseDetailPage extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                purchase.estadoCompra.toLowerCase().contains(
-                                  'complet',
-                                )
+                            color: isCompleted
                                 ? const Color.fromRGBO(0, 200, 83, 0.12)
                                 : const Color.fromRGBO(158, 158, 158, 0.12),
                             borderRadius: BorderRadius.circular(12),
@@ -75,12 +80,7 @@ class PurchaseDetailPage extends StatelessWidget {
                           child: Text(
                             purchase.estadoCompra,
                             style: TextStyle(
-                              color:
-                                  purchase.estadoCompra.toLowerCase().contains(
-                                    'complet',
-                                  )
-                                  ? Colors.green
-                                  : Colors.grey,
+                              color: isCompleted ? _primaryGreen : Colors.grey,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -93,11 +93,19 @@ class PurchaseDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Líneas',
+              'Productos',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
-            ...purchase.detalleCompra.map((d) => _buildLineItem(d)),
+            if (purchase.detalleCompra.isEmpty)
+              const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Text('Esta compra no tiene productos para mostrar.'),
+                ),
+              )
+            else
+              ...purchase.detalleCompra.map(_buildLineItem),
             const SizedBox(height: 16),
             Card(
               shape: RoundedRectangleBorder(
@@ -105,24 +113,13 @@ class PurchaseDetailPage extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
-                    const Text(
-                      'Total',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      '\$${purchase.total.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Color(0xFF00C853),
-                      ),
-                    ),
+                    _summaryRow('Subtotal', purchase.subtotal),
+                    const SizedBox(height: 8),
+                    _summaryRow('Impuestos', purchase.totalImpuestos),
+                    const Divider(height: 20),
+                    _summaryRow('Total', purchase.total, isStrong: true),
                   ],
                 ),
               ),
@@ -133,46 +130,66 @@ class PurchaseDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLineItem(PurchaseDetailModel d) {
-    final precio = d.precio ?? 0.0;
-    final cantidad = d.cantidad ?? 0;
+  Widget _buildLineItem(PurchaseDetailModel detail) {
+    final cantidad = detail.cantidad ?? 0;
+    final precio = detail.precioUnitario ?? 0.0;
+    final subtotal = detail.subtotal ?? (precio * cantidad);
+    final productName =
+        detail.nombreProducto ?? 'Producto #${detail.idProducto ?? '-'}';
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Producto: ${d.idProducto ?? '-'}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
-                  Text('Cantidad: $cantidad'),
-                ],
-              ),
+            Text(
+              productName,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 10,
+              runSpacing: 8,
               children: [
-                Text(
-                  '\$${precio.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF00C853),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text('Subtotal: \$${(precio * cantidad).toStringAsFixed(0)}'),
+                _chip('Cant: $cantidad'),
+                _chip('P/U: \$${precio.toStringAsFixed(0)}'),
+                _chip('Subtotal: \$${subtotal.toStringAsFixed(0)}'),
+                if (detail.idDetalleProducto != null)
+                  _chip('Detalle: ${detail.idDetalleProducto}'),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _summaryRow(String label, double amount, {bool isStrong = false}) {
+    final style = TextStyle(
+      fontWeight: isStrong ? FontWeight.bold : FontWeight.w500,
+      fontSize: isStrong ? 16 : 14,
+      color: isStrong ? _primaryGreen : null,
+    );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: style),
+        Text('\$${amount.toStringAsFixed(0)}', style: style),
+      ],
+    );
+  }
+
+  Widget _chip(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F7F4),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(text, style: const TextStyle(fontSize: 12)),
     );
   }
 }
