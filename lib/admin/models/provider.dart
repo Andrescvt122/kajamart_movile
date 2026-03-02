@@ -1,10 +1,7 @@
 // lib/models/provider.dart
 import 'provider_category.dart';
 
-enum ProviderStatus {
-  activo,
-  inactivo,
-}
+enum ProviderStatus { activo, inactivo }
 
 extension ProviderStatusExtension on ProviderStatus {
   String get displayName {
@@ -81,25 +78,71 @@ class Provider {
   });
 
   factory Provider.fromJson(Map<String, dynamic> json) {
-    final nit = _readString(json, ['nit', 'supplierNit', 'supplier_nit', 'id', 'uuid']);
-    final name = _readString(json, ['name', 'supplierName', 'supplier_name', 'businessName']);
-    final contactName =
-        _readString(json, ['contactName', 'contact_name', 'contact', 'contactPerson']);
-    final phone = _readString(json, ['phone', 'phoneNumber', 'phone_number', 'mobile']);
-    final email = _readOptionalString(json, ['email', 'emailAddress', 'email_address']);
-    final address =
-        _readOptionalString(json, ['address', 'addressLine', 'address_line', 'location']);
-    final imageUrl =
-        _readOptionalString(json, ['imageUrl', 'image_url', 'logoUrl', 'logo_url']);
+    final nit = _readString(json, [
+      'nit',
+      'supplierNit',
+      'supplier_nit',
+      'id',
+      'uuid',
+    ]);
+    final name = _readString(json, [
+      'name',
+      'supplierName',
+      'supplier_name',
+      'businessName',
+      'nombre',
+    ]);
+    final contactName = _readString(json, [
+      'contactName',
+      'contact_name',
+      'contact',
+      'contactPerson',
+      'contacto',
+    ]);
+    final phone = _readString(json, [
+      'phone',
+      'phoneNumber',
+      'phone_number',
+      'mobile',
+      'telefono',
+    ]);
+    final email = _readOptionalString(json, [
+      'email',
+      'emailAddress',
+      'email_address',
+      'correo',
+    ]);
+    final address = _readOptionalString(json, [
+      'address',
+      'addressLine',
+      'address_line',
+      'location',
+      'direccion',
+    ]);
+    final imageUrl = _readOptionalString(json, [
+      'imageUrl',
+      'image_url',
+      'logoUrl',
+      'logo_url',
+    ]);
 
     final registrationDate = _parseDate(json);
 
-    final averageRating = _readOptionalDouble(json, ['averageRating', 'rating']);
+    final averageRating = _readOptionalDouble(json, [
+      'averageRating',
+      'rating',
+    ]);
 
-    final categoriesRaw = json['categories'] ?? json['category'] ?? json['supplierCategories'];
+    final categoriesRaw =
+        json['categories'] ??
+        json['category'] ??
+        json['supplierCategories'] ??
+        json['proveedor_categoria'] ??
+        json['categorias'];
     final categories = _parseCategories(categoriesRaw);
 
-    final statusValue = json['status'] ?? json['state'] ?? json['isActive'];
+    final statusValue =
+        json['status'] ?? json['state'] ?? json['isActive'] ?? json['estado'];
     final status = ProviderStatusExtension.fromValue(statusValue);
 
     return Provider(
@@ -221,7 +264,12 @@ List<ProviderCategory> _parseCategories(dynamic raw) {
 }
 
 DateTime? _parseDate(Map<String, dynamic> json) {
-  final potentialKeys = ['registrationDate', 'registration_date', 'createdAt', 'created_at'];
+  final potentialKeys = [
+    'registrationDate',
+    'registration_date',
+    'createdAt',
+    'created_at',
+  ];
 
   for (final key in potentialKeys) {
     if (!json.containsKey(key)) continue;
@@ -237,15 +285,24 @@ DateTime? _parseDate(Map<String, dynamic> json) {
 
     if (value is int) {
       if (value.toString().length == 10) {
-        return DateTime.fromMillisecondsSinceEpoch(value * 1000, isUtc: true).toLocal();
+        return DateTime.fromMillisecondsSinceEpoch(
+          value * 1000,
+          isUtc: true,
+        ).toLocal();
       }
       if (value.toString().length == 13) {
-        return DateTime.fromMillisecondsSinceEpoch(value, isUtc: true).toLocal();
+        return DateTime.fromMillisecondsSinceEpoch(
+          value,
+          isUtc: true,
+        ).toLocal();
       }
     }
 
     if (value is double) {
-      return DateTime.fromMillisecondsSinceEpoch(value.toInt(), isUtc: true).toLocal();
+      return DateTime.fromMillisecondsSinceEpoch(
+        value.toInt(),
+        isUtc: true,
+      ).toLocal();
     }
   }
 

@@ -1,193 +1,213 @@
 import 'package:flutter/material.dart';
-import '../constants/app_constants.dart';
-import '../services/data_service.dart';
+import 'package:provider/provider.dart';
+
+import '../../auth/models/auth_session.dart';
+import '../../auth/presentation/providers/auth_notifier.dart';
+import '../../profile/presentation/pages/profile_page.dart';
+import '../categories/presentation/pages/categories_page.dart';
+import '../clients/presentation/pages/clients_list_page.dart';
+import '../purchases/presentation/pages/purchases_list_page.dart';
+import '../sales/presentation/pages/sales_list_page.dart';
 import 'product_list.dart';
 import 'provider_list.dart';
 
 class AdminHomeScreen extends StatefulWidget {
-  const AdminHomeScreen({super.key});
+  const AdminHomeScreen({super.key, required this.session});
+
+  final AuthSession session;
 
   @override
-  _AdminHomeScreenState createState() => _AdminHomeScreenState();
+  State<AdminHomeScreen> createState() => _AdminHomeScreenState();
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   int _selectedIndex = 0;
 
-  final List<String> _titles = [
-    'Productos',
-    'Proveedores',
-    'Ventas',
-    'Compras',
-    'Clientes',
-    'Ver mi perfil',
-    'Salir',
-  ];
+  late final List<_MenuModule> _modules;
 
-  void _handleLogout() {
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  @override
+  void initState() {
+    super.initState();
+    _modules = _buildModules(widget.session);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_modules.isEmpty) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFE4EFE8),
+        appBar: AppBar(
+          title: const Text('Kajamart móvil'),
+          backgroundColor: const Color(0xFF0A7A5A),
+          foregroundColor: Colors.white,
+          actions: [
+            IconButton(
+              onPressed: () => context.read<AuthNotifier>().logout(),
+              icon: const Icon(Icons.logout),
+            )
+          ],
+        ),
+        body: const Center(
+          child: Text('Tu rol no tiene permisos para módulos móviles.'),
+        ),
+      );
+    }
+
+    final safeIndex = _selectedIndex >= _modules.length ? 0 : _selectedIndex;
+
     return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: _buildAppBar(),
-      body: _buildScreenContent(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          if (index == 6) {
-            // Logout - navegar al login
-            _handleLogout();
-          } else {
+      backgroundColor: const Color(0xFFE4EFE8),
+      appBar: AppBar(
+        title: Text(_modules[safeIndex].label),
+        backgroundColor: const Color(0xFF0A7A5A),
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            tooltip: 'Mi perfil',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
+              );
+            },
+            icon: const Icon(Icons.person_outline),
+          ),
+          IconButton(
+            tooltip: 'Cerrar sesión',
+            onPressed: () => context.read<AuthNotifier>().logout(),
+            icon: const Icon(Icons.logout),
+          )
+        ],
+      ),
+      body: _modules[safeIndex].builder(),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.1),
+              blurRadius: 12,
+              offset: Offset(0, -3),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: safeIndex,
+          onTap: (index) {
             setState(() {
               _selectedIndex = index;
             });
-          }
-        },
-        selectedItemColor: AppConstants.primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.inventory),
-            label: 'Productos',
+          },
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: const Color(0xFF0A7A5A),
+          unselectedItemColor: const Color(0xFF809487),
+          selectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Proveedores',
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.point_of_sale),
-            label: 'Ventas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Compras',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Clientes'),
-        ],
-      ),
-    );
-  }
-
-  PreferredSizeWidget? _buildAppBar() {
-    const screensWithOwnAppBar = {0, 1, 5};
-
-    if (screensWithOwnAppBar.contains(_selectedIndex)) {
-      return null;
-    }
-
-    return AppBar(
-      title: Text(
-        _titles[_selectedIndex],
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+          items: _modules
+              .map(
+                (m) => BottomNavigationBarItem(
+                  icon: Icon(m.icon),
+                  activeIcon: Icon(m.activeIcon),
+                  label: m.label,
+                ),
+              )
+              .toList(),
         ),
       ),
-      backgroundColor: AppConstants.primaryColor,
-      elevation: 0,
     );
   }
 
-  Widget _buildScreenContent() {
-    switch (_selectedIndex) {
-      case 0:
-        return _buildProductsScreen();
-      case 1:
-        return _buildProvidersScreen();
-      case 2:
-        return _buildSalesScreen();
-      case 3:
-        return _buildPurchasesScreen();
-      case 4:
-        return _buildClientsScreen();
-      case 5:
-        return _buildMyProfileScreen();
-      default:
-        return _buildProductsScreen();
+  List<_MenuModule> _buildModules(AuthSession session) {
+    final modules = <_MenuModule>[];
+
+    if (session.hasPermission('ver productos')) {
+      modules.add(
+        _MenuModule(
+          label: 'Productos',
+          icon: Icons.inventory_2_outlined,
+          activeIcon: Icons.inventory_2,
+          builder: () => const ProductListScreen(),
+        ),
+      );
     }
-  }
 
-  Widget _buildProvidersScreen() {
-    return const ProviderListScreen();
-  }
+    if (session.hasPermission('ver proveedores')) {
+      modules.add(
+        _MenuModule(
+          label: 'Proveedores',
+          icon: Icons.storefront_outlined,
+          activeIcon: Icons.storefront,
+          builder: () => const ProviderListScreen(),
+        ),
+      );
+    }
 
-  Widget _buildProductsScreen() {
-    return ProductListScreen(products: DataService.sampleProducts);
-  }
+    if (session.hasPermission('ver ventas')) {
+      modules.add(
+        _MenuModule(
+          label: 'Ventas',
+          icon: Icons.point_of_sale_outlined,
+          activeIcon: Icons.point_of_sale,
+          builder: createSalesProviderWidget,
+        ),
+      );
+    }
 
-  Widget _buildSalesScreen() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.point_of_sale, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Gestión de Ventas',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Aquí podrás gestionar todas las ventas del sistema',
-            style: TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+    if (session.hasPermission('ver compras')) {
+      modules.add(
+        _MenuModule(
+          label: 'Compras',
+          icon: Icons.shopping_bag_outlined,
+          activeIcon: Icons.shopping_bag,
+          builder: createPurchasesProviderWidget,
+        ),
+      );
+    }
 
-  Widget _buildPurchasesScreen() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.shopping_cart, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Gestión de Compras',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Aquí podrás gestionar todas las compras del sistema',
-            style: TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+    if (session.hasPermission('ver clientes')) {
+      modules.add(
+        _MenuModule(
+          label: 'Clientes',
+          icon: Icons.people_alt_outlined,
+          activeIcon: Icons.people_alt,
+          builder: createClientsProviderWidget,
+        ),
+      );
+    }
 
-  Widget _buildClientsScreen() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people, size: 80, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'Gestión de Clientes',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Aquí podrás gestionar todos los clientes del sistema',
-            style: TextStyle(color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+    if (session.hasPermission('ver categorias')) {
+      modules.add(
+        _MenuModule(
+          label: 'Categorías',
+          icon: Icons.category_outlined,
+          activeIcon: Icons.category,
+          builder: () => const CategoriesPage(),
+        ),
+      );
+    }
 
-  Widget _buildMyProfileScreen() {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Mi Perfil')),
-      body: const Center(child: Text('Pantalla de perfil en construcción')),
-    );
+    return modules;
   }
+}
+
+class _MenuModule {
+  const _MenuModule({
+    required this.label,
+    required this.icon,
+    required this.activeIcon,
+    required this.builder,
+  });
+
+  final String label;
+  final IconData icon;
+  final IconData activeIcon;
+  final Widget Function() builder;
 }
