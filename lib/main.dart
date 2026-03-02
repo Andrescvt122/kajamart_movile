@@ -56,9 +56,11 @@ class _AuthGate extends StatelessWidget {
     final session = auth.session;
     final home =
         session == null ? const LoginPage() : AdminHomeScreen(session: session);
+    final showTestingNoticeOnLogin =
+        _isNonMobileTestingEnabled && session == null;
 
     if (_isStrictMobilePlatform || _isNonMobileTestingEnabled) {
-      if (_isNonMobileTestingEnabled) {
+      if (showTestingNoticeOnLogin) {
         return Stack(
           children: [
             home,

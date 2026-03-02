@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../../data/models/purchase_model.dart';
+import '../../data/models/category_model.dart';
 
-class PurchaseCard extends StatelessWidget {
-  final PurchaseModel purchase;
+class CategoryCard extends StatelessWidget {
+  final CategoryModel category;
   final VoidCallback onTap;
 
-  const PurchaseCard({super.key, required this.purchase, required this.onTap});
+  const CategoryCard({super.key, required this.category, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final isCompleted = purchase.estadoCompra.toLowerCase().contains('complet');
-    final supplierName = purchase.proveedor?.nombre ?? 'Proveedor';
+    final isActive = category.estado;
+    final title = category.nombreCategoria;
+    final preview = category.firstProductPreview;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -31,20 +32,12 @@ class PurchaseCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color.fromRGBO(0, 200, 83, 0.18),
+                  color: const Color.fromRGBO(10, 122, 90, 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Center(
-                  child: Text(
-                    supplierName.isNotEmpty
-                        ? supplierName[0].toUpperCase()
-                        : 'C',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF00C853),
-                    ),
-                  ),
+                child: const Icon(
+                  Icons.category,
+                  color: Color(0xFF0A7A5A),
                 ),
               ),
               const SizedBox(width: 12),
@@ -53,7 +46,7 @@ class PurchaseCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      supplierName,
+                      title,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -61,8 +54,10 @@ class PurchaseCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Factura #${purchase.id}',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      preview,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
                     ),
                   ],
                 ),
@@ -76,25 +71,25 @@ class PurchaseCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: isCompleted
-                          ? const Color.fromRGBO(0, 200, 83, 0.12)
+                      color: isActive
+                          ? const Color.fromRGBO(10, 122, 90, 0.12)
                           : const Color.fromRGBO(158, 158, 158, 0.12),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Text(
-                      purchase.estadoCompra,
+                      isActive ? 'Activa' : 'Inactiva',
                       style: TextStyle(
-                        color: isCompleted ? Colors.green : Colors.grey,
+                        color: isActive ? const Color(0xFF0A7A5A) : Colors.grey,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Subtotal: \$${purchase.subtotal.toStringAsFixed(0)}',
+                    '${category.productos.length} producto(s)',
                     style: const TextStyle(
                       color: Colors.black87,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
