@@ -1,42 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/datasources/sales_remote_data_source.dart';
-import '../../data/repositories/sales_repository_impl.dart';
-import '../providers/sales_notifier.dart';
-import '../widgets/sale_card.dart';
-import 'sale_detail_page.dart';
+import '../../data/datasources/clients_remote_data_source.dart';
+import '../../data/repositories/clients_repository_impl.dart';
+import '../providers/clients_notifier.dart';
+import '../widgets/client_card.dart';
+import 'client_detail_page.dart';
 
-class SalesListPage extends StatelessWidget {
-  const SalesListPage({super.key});
+class ClientsListPage extends StatelessWidget {
+  const ClientsListPage({super.key});
 
-  static SalesRepositoryImpl createSalesRepository() {
+  static ClientsRepositoryImpl createClientsRepository() {
     const String baseUrl = 'http://localhost:3000/kajamart/api';
-    return SalesRepositoryImpl(remote: SalesRemoteDataSource(baseUrl: baseUrl));
+    return ClientsRepositoryImpl(
+      remote: ClientsRemoteDataSource(baseUrl: baseUrl),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) =>
-          SalesNotifier(repository: createSalesRepository())..loadSales(),
-      child: const _SalesModuleScaffold(),
+      create: (_) => ClientsNotifier(repository: createClientsRepository())
+        ..loadClients(),
+      child: const _ClientsModuleScaffold(),
     );
   }
 }
 
-class _SalesModuleScaffold extends StatefulWidget {
-  const _SalesModuleScaffold();
+class _ClientsModuleScaffold extends StatefulWidget {
+  const _ClientsModuleScaffold();
 
   @override
-  State<_SalesModuleScaffold> createState() => _SalesModuleScaffoldState();
+  State<_ClientsModuleScaffold> createState() => _ClientsModuleScaffoldState();
 }
 
-class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
+class _ClientsModuleScaffoldState extends State<_ClientsModuleScaffold> {
   late final TextEditingController _searchController;
   String _selectedFilter = 'Todos';
 
-  final List<String> _filters = const ['Todos', 'Completadas', 'Anuladas'];
+  final List<String> _filters = const ['Todos', 'Activos', 'Inactivos'];
 
   @override
   void initState() {
@@ -55,7 +57,7 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
     return Scaffold(
       backgroundColor: const Color(0xFFE4EFE8),
       body: SafeArea(
-        child: Consumer<SalesNotifier>(
+        child: Consumer<ClientsNotifier>(
           builder: (context, notifier, _) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +65,7 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
                 const Padding(
                   padding: EdgeInsets.fromLTRB(18, 20, 18, 2),
                   child: Text(
-                    'Ventas',
+                    'Clientes',
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.w800,
@@ -75,7 +77,7 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
                 const Padding(
                   padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
                   child: Text(
-                    'Listado de ventas',
+                    'Listado de clientes',
                     style: TextStyle(
                       fontSize: 16,
                       color: Color(0xFF677A70),
@@ -89,7 +91,7 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
                     controller: _searchController,
                     onChanged: notifier.filterByQuery,
                     decoration: InputDecoration(
-                      hintText: 'Buscar ventas...',
+                      hintText: 'Buscar clientes...',
                       hintStyle: const TextStyle(color: Color(0xFF95A39D)),
                       prefixIcon: const Icon(
                         Icons.search,
@@ -144,33 +146,33 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
                   ),
                 ),
                 const Divider(height: 1),
-                const Expanded(child: _SalesContent()),
+                const Expanded(child: _ClientsContent()),
               ],
             );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.read<SalesNotifier>().loadSales(),
+        onPressed: () => context.read<ClientsNotifier>().loadClients(),
         child: const Icon(Icons.refresh),
       ),
     );
   }
 }
 
-class _SalesContent extends StatelessWidget {
-  const _SalesContent();
+class _ClientsContent extends StatelessWidget {
+  const _ClientsContent();
 
   @override
   Widget build(BuildContext context) {
-    final notifier = Provider.of<SalesNotifier>(context);
+    final notifier = Provider.of<ClientsNotifier>(context);
 
     switch (notifier.status) {
-      case SalesStatus.loading:
+      case ClientsStatus.loading:
         return const Center(
-          child: CircularProgressIndicator(color: Color(0xFF00C853)),
+          child: CircularProgressIndicator(color: Color(0xFF0A7A5A)),
         );
-      case SalesStatus.error:
+      case ClientsStatus.error:
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -181,39 +183,41 @@ class _SalesContent extends StatelessWidget {
             ),
           ),
         );
-      case SalesStatus.loaded:
-        if (notifier.filteredSales.isEmpty) {
-          return const Center(child: Text('No se encontraron ventas'));
+      case ClientsStatus.loaded:
+        if (notifier.filteredClients.isEmpty) {
+          return const Center(child: Text('No se encontraron clientes'));
         }
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 24),
-          itemCount: notifier.filteredSales.length,
+          itemCount: notifier.filteredClients.length,
           itemBuilder: (context, index) {
-            final sale = notifier.filteredSales[index];
-            return SaleCard(
-              sale: sale,
+            final client = notifier.filteredClients[index];
+            return ClientCard(
+              client: client,
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => SaleDetailPage(sale: sale)),
+                MaterialPageRoute(
+                  builder: (_) => ClientDetailPage(client: client),
+                ),
               ),
             );
           },
         );
-      case SalesStatus.initial:
+      case ClientsStatus.initial:
         return const SizedBox.shrink();
     }
   }
 }
 
-Widget createSalesProviderWidget() {
+Widget createClientsProviderWidget() {
   return ChangeNotifierProvider(
-    create: (_) => SalesNotifier(
-      repository: SalesRepositoryImpl(
-        remote: SalesRemoteDataSource(
+    create: (_) => ClientsNotifier(
+      repository: ClientsRepositoryImpl(
+        remote: ClientsRemoteDataSource(
           baseUrl: 'http://localhost:3000/kajamart/api',
         ),
       ),
-    )..loadSales(),
-    child: const _SalesModuleScaffold(),
+    )..loadClients(),
+    child: const _ClientsModuleScaffold(),
   );
 }

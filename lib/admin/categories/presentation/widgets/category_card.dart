@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../data/models/sale_model.dart';
 
-class SaleCard extends StatelessWidget {
-  final SaleModel sale;
+import '../../data/models/category_model.dart';
+
+class CategoryCard extends StatelessWidget {
+  final CategoryModel category;
   final VoidCallback onTap;
 
-  const SaleCard({super.key, required this.sale, required this.onTap});
+  const CategoryCard({super.key, required this.category, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final isActive = category.estado;
+    final title = category.nombreCategoria;
+    final preview = category.firstProductPreview;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
@@ -27,20 +32,12 @@ class SaleCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color.fromRGBO(0, 200, 83, 0.18),
+                  color: const Color.fromRGBO(10, 122, 90, 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Center(
-                  child: Text(
-                    sale.cliente?.nombre.isNotEmpty == true
-                        ? sale.cliente!.nombre[0].toUpperCase()
-                        : 'V',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF00C853),
-                    ),
-                  ),
+                child: const Icon(
+                  Icons.category,
+                  color: Color(0xFF0A7A5A),
                 ),
               ),
               const SizedBox(width: 12),
@@ -49,7 +46,7 @@ class SaleCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      sale.cliente?.nombre ?? 'Cliente',
+                      title,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -57,8 +54,10 @@ class SaleCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'ID: ${sale.id} • ${sale.fechaVenta.toLocal().toString().split(" ").first}',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      preview,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
                     ),
                   ],
                 ),
@@ -72,28 +71,25 @@ class SaleCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: sale.estadoVenta.toLowerCase().contains('complet')
-                          ? const Color.fromRGBO(0, 200, 83, 0.12)
+                      color: isActive
+                          ? const Color.fromRGBO(10, 122, 90, 0.12)
                           : const Color.fromRGBO(158, 158, 158, 0.12),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Text(
-                      sale.estadoVenta,
+                      isActive ? 'Activa' : 'Inactiva',
                       style: TextStyle(
-                        color:
-                            sale.estadoVenta.toLowerCase().contains('complet')
-                            ? Colors.green
-                            : Colors.grey,
+                        color: isActive ? const Color(0xFF0A7A5A) : Colors.grey,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${sale.total.toStringAsFixed(0)}',
+                    '${category.productos.length} producto(s)',
                     style: const TextStyle(
-                      color: Color(0xFF121B17),
-                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

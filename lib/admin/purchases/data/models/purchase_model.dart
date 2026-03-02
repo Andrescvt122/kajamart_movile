@@ -1,8 +1,10 @@
-/// Modelo de dato para una Compra (mapea la respuesta del backend).
+/// Purchase model mapped from backend response.
 class PurchaseModel {
   final String id;
   final DateTime fechaCompra;
   final String idProveedor;
+  final double subtotal;
+  final double totalImpuestos;
   final double total;
   final String estadoCompra;
   final List<PurchaseDetailModel> detalleCompra;
@@ -12,6 +14,8 @@ class PurchaseModel {
     required this.id,
     required this.fechaCompra,
     required this.idProveedor,
+    required this.subtotal,
+    required this.totalImpuestos,
     required this.total,
     required this.estadoCompra,
     required this.detalleCompra,
@@ -19,32 +23,31 @@ class PurchaseModel {
   });
 
   factory PurchaseModel.fromJson(Map<String, dynamic> json) {
-    // Fecha: puede venir como ISO string
     DateTime parsedDate;
     try {
       parsedDate = DateTime.parse(json['fecha_compra'].toString());
-    } catch (e) {
+    } catch (_) {
       parsedDate = DateTime.now();
     }
 
     return PurchaseModel(
-      id: json['id_compra']?.toString() ?? '',
+      id: json['id_compra']?.toString() ?? json['id']?.toString() ?? '',
       fechaCompra: parsedDate,
       idProveedor: json['id_proveedor']?.toString() ?? '',
-      // total viene como string en la API; parsear a double
-      total: (json['total'] != null)
-          ? double.tryParse(json['total'].toString()) ?? 0.0
-          : 0.0,
+      subtotal: _toDouble(json['subtotal']),
+      totalImpuestos: _toDouble(json['total_impuestos']),
+      total: _toDouble(json['total']),
       estadoCompra: json['estado_compra']?.toString() ?? '',
       detalleCompra:
           (json['detalle_compra'] as List<dynamic>?)
-              ?.map(
-                (e) => PurchaseDetailModel.fromJson(e as Map<String, dynamic>),
-              )
+              ?.whereType<Map>()
+              .map((e) => PurchaseDetailModel.fromJson(Map<String, dynamic>.from(e)))
               .toList() ??
-          [],
-      proveedor: json['proveedores'] != null
-          ? SupplierModel.fromJson(json['proveedores'] as Map<String, dynamic>)
+          <PurchaseDetailModel>[],
+      proveedor: json['proveedores'] is Map
+          ? SupplierModel.fromJson(
+              Map<String, dynamic>.from(json['proveedores'] as Map),
+            )
           : null,
     );
   }
@@ -53,51 +56,81 @@ class PurchaseModel {
     'id_compra': id,
     'fecha_compra': fechaCompra.toIso8601String(),
     'id_proveedor': idProveedor,
-    'total': total.toString(),
+    'subtotal': subtotal,
+    'total_impuestos': totalImpuestos,
+    'total': total,
     'estado_compra': estadoCompra,
     'detalle_compra': detalleCompra.map((d) => d.toJson()).toList(),
     'proveedores': proveedor?.toJson(),
   };
 }
 
-/// Modelo para el detalle de una compra (línea de producto)
+/// Purchase detail line model.
 class PurchaseDetailModel {
   final String id;
   final String idCompra;
-  final String? idProducto;
   final int? cantidad;
-  final double? precio; // ahora como número
+  final double? precioUnitario;
+  final double? subtotal;
+  final String? idDetalleProducto;
+  final String? idProducto;
+  final String? nombreProducto;
+  final int? cantidadPaquetes;
+  final int? unidadesPorPaquete;
+  final int? cantidadTotalUnidades;
 
   PurchaseDetailModel({
     required this.id,
     required this.idCompra,
-    this.idProducto,
     this.cantidad,
-    this.precio,
+    this.precioUnitario,
+    this.subtotal,
+    this.idDetalleProducto,
+    this.idProducto,
+    this.nombreProducto,
+    this.cantidadPaquetes,
+    this.unidadesPorPaquete,
+    this.cantidadTotalUnidades,
   });
 
   factory PurchaseDetailModel.fromJson(Map<String, dynamic> json) {
+    final detalleProductos = json['detalle_productos'] is Map
+        ? Map<String, dynamic>.from(json['detalle_productos'] as Map)
+        : const <String, dynamic>{};
+    final productos = detalleProductos['productos'] is Map
+        ? Map<String, dynamic>.from(detalleProductos['productos'] as Map)
+        : const <String, dynamic>{};
+
     return PurchaseDetailModel(
-      id: json['id']?.toString() ?? '',
+      id: json['id_detalle']?.toString() ?? json['id']?.toString() ?? '',
       idCompra: json['id_compra']?.toString() ?? '',
-      idProducto: json['id_producto']?.toString(),
-      cantidad: json['cantidad'] is int
-          ? json['cantidad'] as int
-          : (json['cantidad'] != null
-                ? int.tryParse(json['cantidad'].toString())
-                : null),
-      precio: (json['precio'] != null)
-          ? double.tryParse(json['precio'].toString())
-          : null,
+      cantidad: _toInt(json['cantidad']),
+      precioUnitario: _toNullableDouble(json['precio_unitario'] ?? json['precio']),
+      subtotal: _toNullableDouble(json['subtotal']),
+      idDetalleProducto:
+          json['id_detalle_producto']?.toString() ??
+          detalleProductos['id_detalle_producto']?.toString(),
+      idProducto:
+          json['id_producto']?.toString() ??
+          detalleProductos['id_producto']?.toString(),
+      nombreProducto: productos['nombre']?.toString(),
+      cantidadPaquetes: _toInt(json['cantidad_paquetes']),
+      unidadesPorPaquete: _toInt(json['unidades_por_paquete']),
+      cantidadTotalUnidades: _toInt(json['cantidad_total_unidades']),
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
+    'id_detalle': id,
     'id_compra': idCompra,
-    'id_producto': idProducto,
     'cantidad': cantidad,
-    'precio': precio?.toString(),
+    'precio_unitario': precioUnitario,
+    'subtotal': subtotal,
+    'id_detalle_producto': idDetalleProducto,
+    'id_producto': idProducto,
+    'cantidad_paquetes': cantidadPaquetes,
+    'unidades_por_paquete': unidadesPorPaquete,
+    'cantidad_total_unidades': cantidadTotalUnidades,
   };
 }
 
@@ -140,8 +173,7 @@ class SupplierModel {
                 json['estado']?.toString().toLowerCase() == 'true'),
       descripcion: json['descripcion']?.toString(),
       nit: json['nit']?.toString(),
-      maxPorcentajeDeDevolucion: json['max_porcentaje_de_devolucion']
-          ?.toString(),
+      maxPorcentajeDeDevolucion: json['max_porcentaje_de_devolucion']?.toString(),
       tipoPersona: json['tipo_persona']?.toString(),
       contacto: json['contacto']?.toString(),
       correo: json['correo']?.toString(),
@@ -163,8 +195,22 @@ class SupplierModel {
   };
 }
 
-/// Mock rápido para desarrollo cuando la API no está disponible.
+double _toDouble(dynamic value) {
+  if (value == null) return 0;
+  return double.tryParse(value.toString()) ?? 0;
+}
+
+double? _toNullableDouble(dynamic value) {
+  if (value == null) return null;
+  return double.tryParse(value.toString());
+}
+
+int? _toInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  return int.tryParse(value.toString());
+}
+
 const List<PurchaseModel> _mockPurchases = [];
 
-// Export mock si needed
 List<PurchaseModel> get mockPurchases => _mockPurchases;

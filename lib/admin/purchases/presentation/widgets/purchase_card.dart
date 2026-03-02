@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../data/models/purchase_model.dart';
 
 class PurchaseCard extends StatelessWidget {
@@ -9,29 +10,34 @@ class PurchaseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    final isCompleted = purchase.estadoCompra.toLowerCase().contains('complet');
+    final supplierName = purchase.proveedor?.nombre ?? 'Proveedor';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFC6E8D5)),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              // Leading avatar with first letter of supplier
               Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  // Avoid deprecated withOpacity() - use Color.fromRGBO to set opacity
                   color: const Color.fromRGBO(0, 200, 83, 0.18),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
                   child: Text(
-                    purchase.proveedor?.nombre.isNotEmpty == true
-                        ? purchase.proveedor!.nombre[0].toUpperCase()
+                    supplierName.isNotEmpty
+                        ? supplierName[0].toUpperCase()
                         : 'C',
                     style: const TextStyle(
                       fontSize: 18,
@@ -47,7 +53,7 @@ class PurchaseCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      purchase.proveedor?.nombre ?? 'Proveedor',
+                      supplierName,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -55,7 +61,7 @@ class PurchaseCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'ID: ${purchase.id} • ${purchase.fechaCompra.toLocal().toString().split(" ").first}',
+                      'Factura #${purchase.id}',
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                   ],
@@ -70,32 +76,24 @@ class PurchaseCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          purchase.estadoCompra.toLowerCase().contains(
-                            'complet',
-                          )
+                      color: isCompleted
                           ? const Color.fromRGBO(0, 200, 83, 0.12)
                           : const Color.fromRGBO(158, 158, 158, 0.12),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     child: Text(
                       purchase.estadoCompra,
                       style: TextStyle(
-                        color:
-                            purchase.estadoCompra.toLowerCase().contains(
-                              'complet',
-                            )
-                            ? Colors.green
-                            : Colors.grey,
+                        color: isCompleted ? Colors.green : Colors.grey,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${purchase.total.toStringAsFixed(0)}',
+                    'Subtotal: \$${purchase.subtotal.toStringAsFixed(0)}',
                     style: const TextStyle(
-                      color: Color(0xFF00C853),
+                      color: Colors.black87,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

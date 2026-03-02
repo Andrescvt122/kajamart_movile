@@ -1,42 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/datasources/sales_remote_data_source.dart';
-import '../../data/repositories/sales_repository_impl.dart';
-import '../providers/sales_notifier.dart';
-import '../widgets/sale_card.dart';
-import 'sale_detail_page.dart';
+import '../../data/datasources/categories_remote_data_source.dart';
+import '../../data/repositories/categories_repository_impl.dart';
+import '../providers/categories_notifier.dart';
+import '../widgets/category_card.dart';
+import 'category_detail_page.dart';
 
-class SalesListPage extends StatelessWidget {
-  const SalesListPage({super.key});
+class CategoriesPage extends StatelessWidget {
+  const CategoriesPage({super.key});
 
-  static SalesRepositoryImpl createSalesRepository() {
+  static CategoriesRepositoryImpl createCategoriesRepository() {
     const String baseUrl = 'http://localhost:3000/kajamart/api';
-    return SalesRepositoryImpl(remote: SalesRemoteDataSource(baseUrl: baseUrl));
+    return CategoriesRepositoryImpl(
+      remote: CategoriesRemoteDataSource(baseUrl: baseUrl),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) =>
-          SalesNotifier(repository: createSalesRepository())..loadSales(),
-      child: const _SalesModuleScaffold(),
+          CategoriesNotifier(repository: createCategoriesRepository())
+            ..loadCategories(),
+      child: const _CategoriesModuleScaffold(),
     );
   }
 }
 
-class _SalesModuleScaffold extends StatefulWidget {
-  const _SalesModuleScaffold();
+class _CategoriesModuleScaffold extends StatefulWidget {
+  const _CategoriesModuleScaffold();
 
   @override
-  State<_SalesModuleScaffold> createState() => _SalesModuleScaffoldState();
+  State<_CategoriesModuleScaffold> createState() =>
+      _CategoriesModuleScaffoldState();
 }
 
-class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
+class _CategoriesModuleScaffoldState extends State<_CategoriesModuleScaffold> {
   late final TextEditingController _searchController;
-  String _selectedFilter = 'Todos';
-
-  final List<String> _filters = const ['Todos', 'Completadas', 'Anuladas'];
 
   @override
   void initState() {
@@ -55,7 +56,7 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
     return Scaffold(
       backgroundColor: const Color(0xFFE4EFE8),
       body: SafeArea(
-        child: Consumer<SalesNotifier>(
+        child: Consumer<CategoriesNotifier>(
           builder: (context, notifier, _) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +64,7 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
                 const Padding(
                   padding: EdgeInsets.fromLTRB(18, 20, 18, 2),
                   child: Text(
-                    'Ventas',
+                    'Categorias',
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.w800,
@@ -75,7 +76,7 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
                 const Padding(
                   padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
                   child: Text(
-                    'Listado de ventas',
+                    'Listado de categorias',
                     style: TextStyle(
                       fontSize: 16,
                       color: Color(0xFF677A70),
@@ -89,7 +90,7 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
                     controller: _searchController,
                     onChanged: notifier.filterByQuery,
                     decoration: InputDecoration(
-                      hintText: 'Buscar ventas...',
+                      hintText: 'Buscar categorias...',
                       hintStyle: const TextStyle(color: Color(0xFF95A39D)),
                       prefixIcon: const Icon(
                         Icons.search,
@@ -112,65 +113,34 @@ class _SalesModuleScaffoldState extends State<_SalesModuleScaffold> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 50,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    itemCount: _filters.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final filter = _filters[index];
-                      final isSelected = filter == _selectedFilter;
-                      return ChoiceChip(
-                        label: Text(
-                          filter,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: const Color(0xFF0A7A5A),
-                        backgroundColor: const Color(0xFFDDECE4),
-                        onSelected: (_) {
-                          setState(() => _selectedFilter = filter);
-                          notifier.setStateFilter(filter);
-                        },
-                      );
-                    },
-                  ),
-                ),
                 const Divider(height: 1),
-                const Expanded(child: _SalesContent()),
+                const Expanded(child: _CategoriesContent()),
               ],
             );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.read<SalesNotifier>().loadSales(),
+        onPressed: () => context.read<CategoriesNotifier>().loadCategories(),
         child: const Icon(Icons.refresh),
       ),
     );
   }
 }
 
-class _SalesContent extends StatelessWidget {
-  const _SalesContent();
+class _CategoriesContent extends StatelessWidget {
+  const _CategoriesContent();
 
   @override
   Widget build(BuildContext context) {
-    final notifier = Provider.of<SalesNotifier>(context);
+    final notifier = context.watch<CategoriesNotifier>();
 
     switch (notifier.status) {
-      case SalesStatus.loading:
+      case CategoriesStatus.loading:
         return const Center(
           child: CircularProgressIndicator(color: Color(0xFF00C853)),
         );
-      case SalesStatus.error:
+      case CategoriesStatus.error:
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -181,39 +151,28 @@ class _SalesContent extends StatelessWidget {
             ),
           ),
         );
-      case SalesStatus.loaded:
-        if (notifier.filteredSales.isEmpty) {
-          return const Center(child: Text('No se encontraron ventas'));
+      case CategoriesStatus.loaded:
+        if (notifier.filteredCategories.isEmpty) {
+          return const Center(child: Text('No se encontraron categorias'));
         }
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 24),
-          itemCount: notifier.filteredSales.length,
+          itemCount: notifier.filteredCategories.length,
           itemBuilder: (context, index) {
-            final sale = notifier.filteredSales[index];
-            return SaleCard(
-              sale: sale,
+            final category = notifier.filteredCategories[index];
+            return CategoryCard(
+              category: category,
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => SaleDetailPage(sale: sale)),
+                MaterialPageRoute(
+                  builder: (_) => CategoryDetailPage(category: category),
+                ),
               ),
             );
           },
         );
-      case SalesStatus.initial:
+      case CategoriesStatus.initial:
         return const SizedBox.shrink();
     }
   }
-}
-
-Widget createSalesProviderWidget() {
-  return ChangeNotifierProvider(
-    create: (_) => SalesNotifier(
-      repository: SalesRepositoryImpl(
-        remote: SalesRemoteDataSource(
-          baseUrl: 'http://localhost:3000/kajamart/api',
-        ),
-      ),
-    )..loadSales(),
-    child: const _SalesModuleScaffold(),
-  );
 }
