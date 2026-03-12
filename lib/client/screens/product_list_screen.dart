@@ -16,7 +16,7 @@ class ProductListScreen extends StatefulWidget {
 class _ProductListScreenState extends State<ProductListScreen> {
   // URL de tu backend
   static const String _productsUrl =
-      'http://localhost:3000/kajamart/api/products';
+      'http://localhost:3000/kajamart/api/products/all';
 
   List<Product> _products = <Product>[];
   bool _isLoading = true;
@@ -46,8 +46,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
       if (response.statusCode == 200) {
         final dynamic decoded = jsonDecode(response.body);
-        if (decoded is List) {
-          final List<Product> loadedProducts = decoded
+        final List<dynamic>? productsData = decoded is List
+            ? decoded
+            : (decoded is Map<String, dynamic> && decoded['data'] is List)
+            ? decoded['data'] as List<dynamic>
+            : null;
+
+        if (productsData != null) {
+          final List<Product> loadedProducts = productsData
               .map((item) => Product.fromJson(item as Map<String, dynamic>))
               .toList();
 
@@ -78,10 +84,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: _buildBody(),
-    );
+    return Scaffold(appBar: _buildAppBar(), body: _buildBody());
   }
 
   PreferredSizeWidget _buildAppBar() {
@@ -123,22 +126,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline,
-                  size: 64, color: Colors.red.shade300),
+              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
               const SizedBox(height: 16),
               const Text(
                 'Ocurrió un error al cargar los productos',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 8),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-              ),
+              Text(_errorMessage!, textAlign: TextAlign.center),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _fetchProducts,
@@ -156,12 +152,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
       final category = (product.categoryName ?? '').toLowerCase();
       final query = searchQuery.toLowerCase();
 
-      final matchesSearch =
-          name.contains(query) || category.contains(query);
+      final matchesSearch = name.contains(query) || category.contains(query);
 
       final statusLabel = product.statusLabel.toLowerCase();
-      final matchesStatus = statusFilter == "Todos" ||
-          statusLabel == statusFilter.toLowerCase();
+      final matchesStatus =
+          statusFilter == "Todos" || statusLabel == statusFilter.toLowerCase();
 
       return matchesSearch && matchesStatus;
     }).toList();
@@ -171,9 +166,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       filteredProducts.sort((a, b) {
         final aPrice = a.price ?? 0;
         final bPrice = b.price ?? 0;
-        return isPriceAsc
-            ? aPrice.compareTo(bPrice)
-            : bPrice.compareTo(aPrice);
+        return isPriceAsc ? aPrice.compareTo(bPrice) : bPrice.compareTo(aPrice);
       });
     }
 
@@ -188,17 +181,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
           builder: (context, double value, child) {
             return Transform.translate(
               offset: Offset(0, value),
-              child:
-                  Opacity(opacity: 1 - (value.abs() / 50), child: child),
+              child: Opacity(opacity: 1 - (value.abs() / 50), child: child),
             );
           },
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: const [
-                BoxShadow(color: Colors.black12, blurRadius: 5)
+                BoxShadow(color: Colors.black12, blurRadius: 5),
               ],
             ),
             child: Row(
@@ -235,19 +226,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     padding: const EdgeInsets.all(8),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: 0.6,
-                    ),
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 0.6,
+                        ),
                     itemCount: filteredProducts.length,
                     itemBuilder: (context, index) {
                       final product = filteredProducts[index];
                       return TweenAnimationBuilder(
                         tween: Tween<double>(begin: 0, end: 1),
-                        duration: Duration(
-                          milliseconds: 300 + (index * 100),
-                        ),
+                        duration: Duration(milliseconds: 300 + (index * 100)),
                         curve: Curves.easeOut,
                         builder: (context, double value, child) {
                           return Opacity(
@@ -272,14 +261,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             ],
                           ),
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.stretch,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // Imagen
                               Expanded(
                                 child: ClipRRect(
-                                  borderRadius:
-                                      const BorderRadius.vertical(
+                                  borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(10),
                                   ),
                                   child: _buildProductImage(product),
@@ -289,8 +276,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               Padding(
                                 padding: const EdgeInsets.all(6),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       product.name,
@@ -315,8 +301,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                       product.statusLabel,
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: product.statusLabel ==
-                                                "Activo"
+                                        color: product.statusLabel == "Activo"
                                             ? Colors.green
                                             : Colors.red,
                                       ),
@@ -358,9 +343,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     if (!hasImage) {
       return Container(
         color: Colors.grey.shade200,
-        child: const Center(
-          child: Icon(Icons.image_not_supported),
-        ),
+        child: const Center(child: Icon(Icons.image_not_supported)),
       );
     }
 
@@ -370,9 +353,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       errorBuilder: (_, __, ___) {
         return Container(
           color: Colors.grey.shade200,
-          child: const Center(
-            child: Icon(Icons.image_not_supported),
-          ),
+          child: const Center(child: Icon(Icons.image_not_supported)),
         );
       },
     );
@@ -401,9 +382,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       selectedColor: Colors.green.shade100,
       checkmarkColor: Colors.green,
       labelStyle: const TextStyle(fontWeight: FontWeight.w500),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 
@@ -441,9 +420,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       selectedColor: const Color.fromARGB(255, 255, 255, 255),
       checkmarkColor: Colors.green,
       labelStyle: const TextStyle(fontWeight: FontWeight.w500),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 }

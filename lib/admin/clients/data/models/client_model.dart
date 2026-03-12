@@ -19,6 +19,17 @@ class AdminClientModel {
   });
 
   factory AdminClientModel.fromJson(Map<String, dynamic> json) {
+    final rawEstado = json['estado_cliente'];
+    final estado = rawEstado is bool
+        ? (rawEstado ? 'Activo' : 'Inactivo')
+        : ((rawEstado?.toString().toLowerCase() == 'true' ||
+                  rawEstado?.toString() == '1')
+              ? 'Activo'
+              : (rawEstado?.toString().toLowerCase() == 'false' ||
+                    rawEstado?.toString() == '0')
+              ? 'Inactivo'
+              : rawEstado?.toString() ?? '');
+
     return AdminClientModel(
       id: int.tryParse(json['id_cliente']?.toString() ?? '') ?? 0,
       nombre: json['nombre_cliente']?.toString() ?? '',
@@ -26,17 +37,17 @@ class AdminClientModel {
       numeroDocumento: json['numero_doc']?.toString() ?? '',
       correo: json['correo_cliente']?.toString() ?? '',
       telefono: json['telefono_cliente']?.toString() ?? '',
-      estado: json['estado_cliente']?.toString() ?? '',
+      estado: estado,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id_cliente': id,
-        'nombre_cliente': nombre,
-        'tipo_docume': tipoDocumento,
-        'numero_doc': numeroDocumento,
-        'correo_cliente': correo,
-        'telefono_cliente': telefono,
-        'estado_cliente': estado,
-      };
+    'id_cliente': id,
+    'nombre_cliente': nombre,
+    'tipo_docume': tipoDocumento,
+    'numero_doc': numeroDocumento,
+    'correo_cliente': correo,
+    'telefono_cliente': telefono,
+    'estado_cliente': estado,
+  };
 }

@@ -16,7 +16,9 @@ class ClientsRemoteDataSource {
     http.Client? httpClient,
   }) : httpClient = httpClient ?? http.Client();
 
-  Future<List<AdminClientModel>> fetchClients({bool useMockData = false}) async {
+  Future<List<AdminClientModel>> fetchClients({
+    bool useMockData = false,
+  }) async {
     if (useMockData || baseUrl.isEmpty) {
       return [];
     }
@@ -35,15 +37,19 @@ class ClientsRemoteDataSource {
       debugPrint('🟢 [Clientes] status: ${response.statusCode}');
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
-        final list = decoded is List
+        final List<dynamic> list = decoded is List
             ? decoded
-            : (decoded is Map<String, dynamic>
-                ? decoded['clients'] as List<dynamic>? ?? []
-                : []);
+            : (decoded is Map<String, dynamic> && decoded['data'] is List)
+            ? decoded['data'] as List<dynamic>
+            : (decoded is Map<String, dynamic> && decoded['clients'] is List)
+            ? decoded['clients'] as List<dynamic>
+            : <dynamic>[];
         return list
-            .map((e) => AdminClientModel.fromJson(
-                  e is Map<String, dynamic> ? e : Map<String, dynamic>.from(e),
-                ))
+            .map(
+              (e) => AdminClientModel.fromJson(
+                e is Map<String, dynamic> ? e : Map<String, dynamic>.from(e),
+              ),
+            )
             .toList();
       }
       throw Exception('HTTP ${response.statusCode}: ${response.body}');

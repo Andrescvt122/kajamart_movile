@@ -46,13 +46,14 @@ class SalesRemoteDataSource {
       debugPrint('🟢 [Ventas] status: ${response.statusCode}');
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // the server may return an array directly
-        final items = data is List
+        final List<dynamic> items = data is List
             ? data
-            : (data is Map && data['sales'] != null
-                  ? data['sales'] as List<dynamic>
-                  : []);
-        final list = (items as List).map((e) {
+            : (data is Map<String, dynamic> && data['data'] is List)
+            ? data['data'] as List<dynamic>
+            : (data is Map<String, dynamic> && data['sales'] is List)
+            ? data['sales'] as List<dynamic>
+            : <dynamic>[];
+        final list = items.map((e) {
           final map = e is Map<String, dynamic>
               ? e
               : Map<String, dynamic>.from(e as Map);

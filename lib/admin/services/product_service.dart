@@ -25,7 +25,7 @@ class ProductService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final uri = Uri.parse('$_baseUrl/products');
+      final uri = Uri.parse('$_baseUrl/products/all');
       final resp = await http.get(uri);
 
       if (resp.statusCode != 200) {
@@ -34,7 +34,18 @@ class ProductService extends ChangeNotifier {
         return;
       }
 
-      final List<dynamic> data = jsonDecode(resp.body) as List<dynamic>;
+      final dynamic decoded = jsonDecode(resp.body);
+      final List<dynamic> data = decoded is List<dynamic>
+          ? decoded
+          : (decoded is Map<String, dynamic> && decoded['data'] is List)
+          ? decoded['data'] as List<dynamic>
+          : <dynamic>[];
+
+      if (data.isEmpty && decoded is! List<dynamic>) {
+        error = 'Formato de respuesta invalido al obtener productos';
+        _products = [];
+        return;
+      }
 
       _products = data.map<Product>((item) {
         final p = item as Map<String, dynamic>;
@@ -78,8 +89,7 @@ class ProductService extends ChangeNotifier {
           purchasePrice: costoUnitario,
           salePrice: precioVenta,
           markupPercent: null,
-          ivaPercent:
-              (p['iva_detalle']?['valor_impuesto'] as num?)?.toDouble(),
+          ivaPercent: (p['iva_detalle']?['valor_impuesto'] as num?)?.toDouble(),
           batches: batches,
         );
       }).toList();
