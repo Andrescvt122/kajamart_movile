@@ -1,10 +1,8 @@
 // lib/services/navigation_service.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:kajamart_movile/admin/models/provider.dart' as model;
 
 import '../models/product.dart';
-import '../services/product_service.dart';
 import '../constants/app_constants.dart';
 import '../screens/product_list.dart';
 import '../screens/product_batches.dart';
@@ -19,11 +17,10 @@ class NavigationService {
     RouteSettings settings,
     BuildContext context,
   ) {
-    final productService = Provider.of<ProductService>(context, listen: false);
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(
-          builder: (_) => ProductListScreen(products: productService.products),
+          builder: (_) => const ProductListScreen(),
         );
 
       case '/suppliers':

@@ -1,10 +1,11 @@
+// lib/admin/screens/product_detail.dart
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
 import '../models/product.dart';
 import '../models/batch.dart';
 
 class ProductDetailScreen extends StatelessWidget {
-  const ProductDetailScreen({Key? key}) : super(key: key);
+  const ProductDetailScreen({super.key});
 
   Widget _row(String label, String value) {
     return Padding(
@@ -33,10 +34,21 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
+  String _formatDate(DateTime date) {
+    return date.toIso8601String().split('T')[0];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final args = ModalRoute.of(context)!.settings.arguments;
+
+    if (args == null || args is! Map<String, dynamic>) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Error')),
+        body: const Center(child: Text('Parámetros inválidos para detalle')),
+      );
+    }
+
     final Product product = args['product'] as Product;
     final Batch batch = args['batch'] as Batch;
 
@@ -89,7 +101,7 @@ class ProductDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Tarjeta con info general
+            // Info general
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -104,14 +116,14 @@ class ProductDetailScreen extends StatelessWidget {
                   children: [
                     _row('Producto ID', product.id),
                     _row('Nombre', product.name),
+                    _row('Categoría', product.category),
                     _row('Código de barras', batch.barcode),
-                    _row('ICU', '—'),
                   ],
                 ),
               ),
             ),
 
-            // Tarjeta con info de precios
+            // Precios
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -137,10 +149,8 @@ class ProductDetailScreen extends StatelessWidget {
                           : '—',
                     ),
                     _row(
-                      'Subida de Venta (%)',
-                      product.markupPercent != null
-                          ? '${product.markupPercent}%'
-                          : '—',
+                      'Precio lote',
+                      '\$${batch.price.toStringAsFixed(0)}',
                     ),
                     _row(
                       'IVA',
@@ -153,7 +163,7 @@ class ProductDetailScreen extends StatelessWidget {
               ),
             ),
 
-            // Tarjeta con info de stock
+            // Stock / lote
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -167,11 +177,14 @@ class ProductDetailScreen extends StatelessWidget {
                   children: [
                     _row(
                       'Fecha de vencimiento',
-                      batch.expiryDate.toIso8601String().split('T')[0],
+                      _formatDate(batch.expiryDate),
                     ),
-                    _row('Max Stock', product.maxStock.toString()),
-                    _row('Mini Stock', product.minStock.toString()),
-                    _row('Stock total', product.currentStock.toString()),
+                    _row('Cantidad en lote', batch.quantity.toString()),
+                    _row('Consumido', batch.consumedStock.toString()),
+                    _row('Stock total producto',
+                        product.currentStock.toString()),
+                    _row('Stock mín', product.minStock.toString()),
+                    _row('Stock máx', product.maxStock.toString()),
                   ],
                 ),
               ),

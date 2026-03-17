@@ -51,7 +51,8 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       list = list.where(
-        (p) => p.name.toLowerCase().contains(query) ||
+        (p) =>
+            p.name.toLowerCase().contains(query) ||
             p.contactName.toLowerCase().contains(query) ||
             p.nit.toLowerCase().contains(query),
       );
@@ -67,63 +68,87 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppConstants.secondaryColor,
-        elevation: 0,
-        title: Text(
-          'Proveedores',
-          style: TextStyle(
-            color: AppConstants.textDarkColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: AnimatedBuilder(
-        animation: _providerService,
-        builder: (context, _) {
-          if (_providerService.isLoading && _providers.isEmpty) {
-            return _buildLoadingView();
-          }
-
-          if (_providerService.errorMessage != null && _providers.isEmpty) {
-            return _buildErrorView();
-          }
-
-          return RefreshIndicator(
-            onRefresh: _onRefresh,
-            color: AppConstants.primaryColor,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
+      backgroundColor: const Color(0xFFE4EFE8),
+      body: SafeArea(
+        child: AnimatedBuilder(
+          animation: _providerService,
+          builder: (context, _) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (_providerService.isLoading)
-                  const LinearProgressIndicator(minHeight: 2),
-                const SizedBox(height: 12),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(18, 20, 18, 2),
+                  child: Text(
+                    'Proveedores',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0E6E54),
+                      height: 0.95,
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(18, 0, 18, 14),
+                  child: Text(
+                    'Listado de proveedores',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF677A70),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
                 _buildSearchBar(),
                 _buildFilterChips(),
                 const Divider(height: 1),
-                if (_providerService.errorMessage != null)
-                  _buildInlineError(_providerService.errorMessage!),
-                if (filteredProviders.isEmpty)
-                  _buildEmptyState()
-                else
-                  ..._buildProviderCards(filteredProviders),
-                const SizedBox(height: 24),
+                Expanded(
+                  child: Builder(
+                    builder: (_) {
+                      if (_providerService.isLoading && _providers.isEmpty) {
+                        return _buildLoadingView();
+                      }
+
+                      if (_providerService.errorMessage != null &&
+                          _providers.isEmpty) {
+                        return _buildErrorView();
+                      }
+
+                      if (filteredProviders.isEmpty) {
+                        return _buildEmptyState();
+                      }
+
+                      return ListView(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 24),
+                        children: [
+                          if (_providerService.isLoading)
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: LinearProgressIndicator(minHeight: 2),
+                            ),
+                          if (_providerService.errorMessage != null)
+                            _buildInlineError(_providerService.errorMessage!),
+                          ..._buildProviderCards(filteredProviders),
+                        ],
+                      );
+                    },
+                  ),
+                ),
               ],
-            ),
-          );
-        },
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _onRefresh,
+        child: const Icon(Icons.refresh),
       ),
     );
   }
 
   Widget _buildLoadingView() {
     return Center(
-      child: CircularProgressIndicator(
-        color: AppConstants.primaryColor,
-      ),
+      child: CircularProgressIndicator(color: AppConstants.primaryColor),
     );
   }
 
@@ -160,9 +185,9 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.redAccent.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+        color: Colors.redAccent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,15 +197,10 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                color: Colors.redAccent.shade700,
-              ),
+              style: TextStyle(color: Colors.redAccent.shade700),
             ),
           ),
-          TextButton(
-            onPressed: _onRefresh,
-            child: const Text('Actualizar'),
-          ),
+          TextButton(onPressed: _onRefresh, child: const Text('Actualizar')),
         ],
       ),
     );
@@ -188,7 +208,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
       child: TextField(
         onChanged: (value) {
           setState(() {
@@ -196,21 +216,22 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
           });
         },
         decoration: InputDecoration(
-          hintText: 'Buscar proveedor...',
-          prefixIcon: Icon(Icons.search, color: AppConstants.textLightColor),
+          hintText: 'Buscar proveedores...',
+          hintStyle: const TextStyle(color: Color(0xFF95A39D)),
+          prefixIcon: const Icon(Icons.search, color: Color(0xFF9AA8A2)),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: const Color(0xFFF0F2F1),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 0,
+            horizontal: 20,
+            vertical: 14,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppConstants.secondaryColor),
+            borderRadius: BorderRadius.circular(28),
+            borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppConstants.textLightColor),
+            borderRadius: BorderRadius.circular(28),
+            borderSide: const BorderSide(color: Color(0xFF0A7A5A)),
           ),
         ),
       ),
@@ -222,7 +243,7 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
       height: 50,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
         itemCount: filters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
@@ -236,8 +257,8 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
               ),
             ),
             selected: isSelected,
-            selectedColor: AppConstants.textLightColor,
-            backgroundColor: AppConstants.secondaryColor.withOpacity(0.3),
+            selectedColor: const Color(0xFF0A7A5A),
+            backgroundColor: const Color(0xFFDDECE4),
             onSelected: (_) {
               setState(() {
                 _selectedFilter = filter;
@@ -253,23 +274,27 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
     final hasActiveFilter =
         _selectedFilter != 'Todos' || _searchQuery.trim().isNotEmpty;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-      child: Column(
-        children: [
-          Icon(Icons.inventory_2, size: 60, color: AppConstants.textLightColor),
-          const SizedBox(height: 16),
-          Text(
-            hasActiveFilter
-                ? 'No se encontraron proveedores con los filtros aplicados.'
-                : 'No hay proveedores registrados.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: AppConstants.textDarkColor,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.inventory_2,
+              size: 60,
+              color: AppConstants.textLightColor,
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(
+              hasActiveFilter
+                  ? 'No se encontraron proveedores con los filtros aplicados.'
+                  : 'No hay proveedores registrados.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: AppConstants.textDarkColor),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -291,20 +316,23 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: AppConstants.secondaryColor.withOpacity(0.5),
+                  color: const Color(0xFFC6E8D5),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 5,
                     offset: const Offset(0, 3),
                   ),
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -363,22 +391,26 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                             runSpacing: 4,
                             children: provider.categories.isNotEmpty
                                 ? provider.categories
-                                    .map(
-                                      (category) => Chip(
-                                        label: Text(
-                                          category.name,
-                                          style: const TextStyle(fontSize: 11),
+                                      .map(
+                                        (category) => Chip(
+                                          label: Text(
+                                            category.name,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                          backgroundColor: AppConstants
+                                              .secondaryColor
+                                              .withValues(alpha: 0.2),
                                         ),
-                                        backgroundColor: AppConstants.secondaryColor
-                                            .withOpacity(0.2),
-                                      ),
-                                    )
-                                    .toList()
+                                      )
+                                      .toList()
                                 : [
                                     Chip(
                                       label: const Text('Sin categorías'),
-                                      backgroundColor:
-                                          AppConstants.secondaryColor.withOpacity(0.2),
+                                      backgroundColor: AppConstants
+                                          .secondaryColor
+                                          .withValues(alpha: 0.2),
                                     ),
                                   ],
                           ),
@@ -387,10 +419,14 @@ class _ProviderListScreenState extends State<ProviderListScreen> {
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color:
-                            Color(provider.status.colorValue).withOpacity(0.1),
+                        color: Color(
+                          provider.status.colorValue,
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: Color(provider.status.colorValue),

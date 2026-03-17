@@ -7,7 +7,7 @@ import '../models/provider.dart';
 class ProviderDetailScreen extends StatefulWidget {
   final Provider? provider;
 
-  const ProviderDetailScreen({Key? key, this.provider}) : super(key: key);
+  const ProviderDetailScreen({super.key, this.provider});
 
   @override
   State<ProviderDetailScreen> createState() => _ProviderDetailScreenState();
