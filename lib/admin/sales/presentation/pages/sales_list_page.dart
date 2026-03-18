@@ -11,7 +11,7 @@ class SalesListPage extends StatelessWidget {
   const SalesListPage({super.key});
 
   static SalesRepositoryImpl createSalesRepository() {
-    const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
+    const String baseUrl = 'http://localhost:3000/kajamart/api';
     return SalesRepositoryImpl(remote: SalesRemoteDataSource(baseUrl: baseUrl));
   }
 
@@ -210,7 +210,7 @@ Widget createSalesProviderWidget() {
     create: (_) => SalesNotifier(
       repository: SalesRepositoryImpl(
         remote: SalesRemoteDataSource(
-          baseUrl: 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api',
+          baseUrl: 'http://localhost:3000/kajamart/api',
         ),
       ),
     )..loadSales(),

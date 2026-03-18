@@ -15,7 +15,7 @@ npm start
 
 ```powershell
 # En PowerShell, prueba:
-curl -v https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/clients
+curl -v http://localhost:3000/kajamart/api/clients
 
 # Deberías ver:
 # - Status: 200
@@ -34,7 +34,7 @@ Si obtienes error:
 Cuando ejecutas `flutter run`, en la consola busca mensajes azules (logs) como:
 
 ```
-🔵 [Clientes] Intentando GET a: https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/clients
+🔵 [Clientes] Intentando GET a: http://localhost:3000/kajamart/api/clients
 ```
 
 Y después deberías ver:
@@ -67,7 +67,7 @@ Si ves un error rojo:
 ## Paso 5: Logs Esperados (Orden Correcto)
 
 ```
-1. 🔵 [Clientes] Intentando GET a: https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/clients
+1. 🔵 [Clientes] Intentando GET a: http://localhost:3000/kajamart/api/clients
 2. 🟢 [Clientes] Response status: 200
 3. 🟢 [Clientes] Response body: [{"id_cliente": 0, ...}, ...]
 4. 🟢 [Clientes] Clientes parseados: 1
@@ -109,8 +109,8 @@ Si tu backend es lento, aumenta el timeout:
 ## 🆘 Si Nada Funciona
 
 1. Backend corriendo: `npm start` ✅
-2. URL correcta: `https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/clients` ✅
-3. Curl devuelve datos: `curl https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/clients` ✅
+2. URL correcta: `http://localhost:3000/kajamart/api/clients` ✅
+3. Curl devuelve datos: `curl http://localhost:3000/kajamart/api/clients` ✅
 4. Logs en Flutter muestran GET: `🔵 [Clientes]...` ✅
 
 Si todos los pasos pasan pero aún no funciona, comparte:

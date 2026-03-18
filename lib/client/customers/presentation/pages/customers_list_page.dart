@@ -15,7 +15,7 @@ class CustomersListPage extends StatelessWidget {
 
   CustomersRepository _buildRepository() {
     // URL del backend: localhost:3000/kajamart/api/clients
-    const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
+    const String baseUrl = 'http://localhost:3000/kajamart/api';
     const String customersEndpoint = '/clients';
 
     // El data source maneja fallback/mocks y errores de CORS en web.
@@ -31,7 +31,7 @@ class CustomersListPage extends StatelessWidget {
   /// Helper público para reutilizar la misma configuración del repositorio
   /// desde otras pantallas (por ejemplo `AdminHomeScreen`).
   static CustomersRepository createCustomersRepository() {
-    const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
+    const String baseUrl = 'http://localhost:3000/kajamart/api';
     const String customersEndpoint = '/clients';
 
     return CustomersRepositoryImpl(
