@@ -11,7 +11,7 @@ class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
 
   static CategoriesRepositoryImpl createCategoriesRepository() {
-    const String baseUrl = 'http://localhost:3000/kajamart/api';
+    const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
     return CategoriesRepositoryImpl(
       remote: CategoriesRemoteDataSource(baseUrl: baseUrl),
     );

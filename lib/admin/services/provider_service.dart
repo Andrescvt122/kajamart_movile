@@ -9,7 +9,7 @@ import '../models/provider.dart';
 class ProviderService extends ChangeNotifier {
   ProviderService({http.Client? client, String? baseUrl})
       : _client = client ?? http.Client(),
-        _baseUrl = baseUrl ?? 'http://localhost:3000/kajamart/api';
+        _baseUrl = baseUrl ?? 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
 
   final http.Client _client;
   final String _baseUrl;

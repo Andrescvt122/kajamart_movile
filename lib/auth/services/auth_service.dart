@@ -175,13 +175,13 @@ class AuthService {
     const apiPath = '/kajamart/api';
 
     if (kIsWeb) {
-      return 'http://localhost:3000$apiPath';
+      return 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net$apiPath';
     }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:3000$apiPath';
     }
 
-    return 'http://localhost:3000$apiPath';
+    return 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net$apiPath';
   }
 }

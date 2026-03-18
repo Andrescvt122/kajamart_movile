@@ -2,7 +2,7 @@
 
 ## Tu Backend Conectado
 
-**URL:** `http://localhost:3000/kajamart/api/clients`  
+**URL:** `https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/clients`  
 **Método:** GET  
 **Formato:** JSON array de objetos cliente
 
@@ -26,7 +26,7 @@ estado_cliente       →  (ignorado por ahora)
 
 ### 2. **Conexión Configurada** (`customers_list_page.dart`)
 ```dart
-const String baseUrl = 'http://localhost:3000/kajamart/api';
+const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
 const String customersEndpoint = '/clients';
 useMockData: false;  // ← Usa datos reales del backend
 ```
@@ -75,7 +75,7 @@ flutter run
 **Error: "No se pueden cargar los clientes"**
 ```
 → Verifica que el backend está corriendo en puerto 3000
-→ Prueba en curl: curl http://localhost:3000/kajamart/api/clients
+→ Prueba en curl: curl https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/clients
 ```
 
 **Error: "Error de conexión"**
@@ -114,7 +114,7 @@ const String baseUrl = 'https://api.tu-dominio.com/kajamart/api';
 
 ### iOS Simulator
 ```dart
-const String baseUrl = 'http://localhost:3000/kajamart/api';  // funciona directo
+const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';  // funciona directo
 ```
 
 ### Android Emulator
@@ -136,7 +136,7 @@ Si tu backend requiere Bearer token:
 
 ```dart
 CustomersRepository _buildRepository() {
-  const String baseUrl = 'http://localhost:3000/kajamart/api';
+  const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
   const String bearerToken = 'TU_TOKEN_AQUI';  // obtén del login
   
   return CustomersRepositoryImpl(
@@ -159,7 +159,7 @@ CustomersRepository _buildRepository() {
 
 ### Request
 ```
-GET http://localhost:3000/kajamart/api/clients HTTP/1.1
+GET https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/clients HTTP/1.1
 Accept: application/json
 ```
 
