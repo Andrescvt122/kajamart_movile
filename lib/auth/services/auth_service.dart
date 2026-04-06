@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -173,15 +172,6 @@ class AuthService {
 
   String get _baseUrl {
     const apiPath = '/kajamart/api';
-
-    if (kIsWeb) {
-      return 'http://localhost:3000$apiPath';
-    }
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:3000$apiPath';
-    }
-
-    return 'http://localhost:3000$apiPath';
+    return 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net$apiPath';
   }
 }

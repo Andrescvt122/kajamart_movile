@@ -11,7 +11,7 @@ class PurchasesListPage extends StatelessWidget {
   const PurchasesListPage({super.key});
 
   static PurchasesRepositoryImpl createPurchasesRepository() {
-    const String baseUrl = 'http://localhost:3000/kajamart/api';
+    const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
     return PurchasesRepositoryImpl(
       remote: PurchasesRemoteDataSource(baseUrl: baseUrl),
     );
@@ -216,7 +216,7 @@ Widget createPurchasesProviderWidget() {
     create: (_) => PurchasesNotifier(
       repository: PurchasesRepositoryImpl(
         remote: PurchasesRemoteDataSource(
-          baseUrl: 'http://localhost:3000/kajamart/api',
+          baseUrl: 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api',
         ),
       ),
     )..loadPurchases(),

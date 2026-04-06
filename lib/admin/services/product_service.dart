@@ -7,7 +7,7 @@ import '../models/product.dart';
 import '../models/batch.dart';
 
 class ProductService extends ChangeNotifier {
-  final String _baseUrl = 'http://localhost:3000/kajamart/api';
+  final String _baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
 
   bool isLoading = false;
   String? error;

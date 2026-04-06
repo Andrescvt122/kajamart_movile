@@ -16,7 +16,7 @@ class ProductListScreen extends StatefulWidget {
 class _ProductListScreenState extends State<ProductListScreen> {
   // URL de tu backend
   static const String _productsUrl =
-      'http://localhost:3000/kajamart/api/products/all';
+      'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api/products/all';
 
   List<Product> _products = <Product>[];
   bool _isLoading = true;

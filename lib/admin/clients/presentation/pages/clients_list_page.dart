@@ -11,7 +11,7 @@ class ClientsListPage extends StatelessWidget {
   const ClientsListPage({super.key});
 
   static ClientsRepositoryImpl createClientsRepository() {
-    const String baseUrl = 'http://localhost:3000/kajamart/api';
+    const String baseUrl = 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api';
     return ClientsRepositoryImpl(
       remote: ClientsRemoteDataSource(baseUrl: baseUrl),
     );
@@ -214,7 +214,7 @@ Widget createClientsProviderWidget() {
     create: (_) => ClientsNotifier(
       repository: ClientsRepositoryImpl(
         remote: ClientsRemoteDataSource(
-          baseUrl: 'http://localhost:3000/kajamart/api',
+          baseUrl: 'https://kajamart-api-hmate3egacewdkct.canadacentral-01.azurewebsites.net/kajamart/api',
         ),
       ),
     )..loadClients(),
